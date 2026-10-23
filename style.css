@@ -8,6 +8,7 @@
   --border: #e5e5ea;
   --hairline: #f0f0f2;
   --navy: #1e2d4f;
+  --brand: #1a4fd6;  /* vivid blue for the academy name */
   --serif: "Noto Serif KR", Georgia, serif;
   --sans: "Pretendard", system-ui, -apple-system, "Apple SD Gothic Neo", sans-serif;
   --page-w: 1040px;
@@ -136,9 +137,14 @@ h2::after {
   align-items: center;
   padding: 56px 0 24px;
 }
-.hero-brand { display: flex; flex-direction: column; align-items: flex-start; gap: 20px; }
+.hero-brand { display: flex; align-items: center; gap: 24px; }
 .mark { width: 140px; height: auto; max-width: 100%; }
-.hero h1 { font-size: 36px; margin: 0; }
+.hero h1 {
+  display: flex; flex-direction: column;
+  margin: 0;
+  font-size: 40px; line-height: 1.2;
+  color: var(--brand);
+}
 .hero-text { padding-left: 48px; border-left: 1px solid var(--border); }
 .intro p { margin: 0 0 14px; color: var(--muted); font-size: 17px; line-height: 1.8; }
 .intro p:last-child { margin-bottom: 28px; }
@@ -254,9 +260,9 @@ body:not(.ready) .page { visibility: hidden; }
   .view[data-view="home"] { padding-top: 32px; }
   .banner { display: none; }
   .hero { grid-template-columns: minmax(0, 1fr); gap: 20px; padding: 8px 0 0; text-align: center; }
-  .hero-brand { flex-direction: row; justify-content: center; align-items: center; gap: 12px; }
-  .mark { width: 64px; }
-  .hero h1 { font-size: 24px; }
+  .hero-brand { justify-content: center; gap: 14px; }
+  .mark { width: 72px; }
+  .hero h1 { font-size: 26px; text-align: left; }
   .hero-text { padding: 0; border: 0; }
   .intro p { font-size: 15px; }
   .intro p:last-child { margin-bottom: 0; }

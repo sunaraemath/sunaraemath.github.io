@@ -13,7 +13,9 @@
   const fill = (key, html) => $$(`[data-site="${key}"]`).forEach(el => { el.innerHTML = html; });
 
   function render(S) {
-    fill("name", esc(S.name));
+    // "수나래 수학학원" → 수나래 / 수학학원 on two lines beside the mark
+    const [first, ...rest] = String(S.name).split(" ");
+    fill("name", `<span>${esc(first)}</span>${rest.length ? `<span>${esc(rest.join(" "))}</span>` : ""}`);
     fill("shortName", esc(S.short_name || S.name));
     $$('[data-site="mark"]').forEach(img => { img.src = S.mark; img.alt = S.name; });
     fill("intro", paras(S.intro));
