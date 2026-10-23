@@ -14,7 +14,10 @@
   fill("name", esc(S.name));
   fill("shortName", esc(S.shortName));
   $$('[data-site="mark"]').forEach(img => { img.src = S.mark; img.alt = S.name; });
-  fill("intro", paras(S.intro));
+  fill("intro", `<p>${esc(S.intro)}</p>`);
+  if (S.heroPhoto) {
+    $$('[data-site="heroPhoto"]').forEach(el => { el.style.backgroundImage = `url("${S.heroPhoto}")`; el.textContent = ""; });
+  }
   fill("applyLead", esc(S.apply.lead));
   fill("privacy", items(S.apply.privacy));
   fill("footer", esc(S.footer));
@@ -49,7 +52,8 @@
     .filter(l => l.url)
     .map(l => `<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)}</a>`)
     .join("");
-  const infoRow = (label, value) => value ? `<div><dt>${label}</dt><dd>${esc(value)}</dd></div>` : "";
+  const infoRow = (label, value, html) => value ? `<div><dt>${label}</dt><dd>${html || esc(value)}</dd></div>` : "";
+  const tel = L.phone.replace(/[^\d+]/g, "");
 
   fill("location", `
     <div class="loc">
@@ -58,10 +62,9 @@
         <dl class="info">
           ${infoRow("주소", L.address)}
           ${infoRow("위치", L.detail)}
-          ${infoRow("전화", L.phone)}
-          ${infoRow("상담", L.hours)}
+          ${infoRow("전화", L.phone, tel ? `<a class="tel" href="tel:${tel}">${esc(L.phone)}</a>` : "")}
+          ${infoRow("운영 시간", L.hours)}
         </dl>
-        ${L.directions.length ? `<ul class="directions">${items(L.directions)}</ul>` : ""}
         ${links ? `<div class="map-links">${links}</div>` : ""}
       </div>
     </div>`);
@@ -75,6 +78,7 @@
     const view = views.includes(id) ? id : "home";
     $$(".view").forEach(v => { v.hidden = v.dataset.view !== view; });
     $$(".nav a, .drawer a").forEach(a => a.classList.toggle("active", a.getAttribute("href") === `#${view}`));
+    $(".fab").hidden = view === "apply";
     document.title = titles[view] ? `${titles[view]} · ${S.name}` : S.name;
     closeMenu();
     window.scrollTo(0, 0);

@@ -63,7 +63,7 @@ h1, h2, .brand, .person { font-family: var(--serif); font-weight: 600; letter-sp
 }
 .nav .nav-cta:hover, .nav .nav-cta.active { background: var(--text); color: var(--bg); }
 
-.menu-btn, .close-btn, .drawer, .scrim { display: none; }
+.menu-btn, .close-btn, .drawer, .scrim, .fab { display: none; }
 
 /* ----- Page ----- */
 .page {
@@ -107,15 +107,29 @@ h2::after {
 :focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
 
 /* ----- Home ----- */
+.view[data-view="home"] { padding-top: 32px; }
+
+/* Photo on the right with a diagonal left edge; the left side stays empty */
+.banner { position: relative; height: 340px; }
+.banner-photo {
+  position: absolute; top: 0; right: 0; bottom: 0;
+  width: 64%;
+  clip-path: polygon(24% 0, 100% 0, 100% 100%, 0 100%);
+  background: var(--surface) center / cover no-repeat;
+  display: grid; place-items: center;
+  padding-left: 12%;
+  color: var(--faint); font-size: 14px;
+}
+
 .hero {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
   gap: 64px;
   align-items: center;
-  padding: 48px 0;
+  padding: 56px 0 24px;
 }
 .hero-brand { display: flex; flex-direction: column; align-items: flex-start; gap: 20px; }
-.mark { width: 160px; height: auto; max-width: 100%; }
+.mark { width: 140px; height: auto; max-width: 100%; }
 .hero h1 { font-size: 36px; margin: 0; }
 .hero-text { padding-left: 48px; border-left: 1px solid var(--border); }
 .intro p { margin: 0 0 14px; color: var(--muted); font-size: 17px; line-height: 1.8; }
@@ -162,11 +176,11 @@ h2::after {
   color: var(--faint); font-size: 14px;
 }
 .info { margin: 0; display: grid; gap: 12px; }
-.info div { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 12px; }
+.info div { display: grid; grid-template-columns: 80px minmax(0, 1fr); gap: 12px; }
 .info dt { color: var(--faint); font-size: 14px; }
 .info dd { margin: 0; user-select: text; }
-.directions { margin: 20px 0 0; padding: 16px 0 0; border-top: 1px solid var(--border); list-style: none; color: var(--muted); font-size: 15px; }
-.directions li { padding: 2px 0; }
+.tel { text-decoration: underline; text-decoration-color: var(--faint); text-underline-offset: 3px; }
+.tel:hover { text-decoration-color: currentColor; }
 .map-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
 .map-links a {
   padding: 6px 14px;
@@ -287,20 +301,34 @@ select {
   h2 { font-size: 21px; }
   .split { grid-template-columns: minmax(0, 1fr); gap: 24px; }
 
-  /* Home: mark and name stacked, then location and apply */
-  .hero { grid-template-columns: minmax(0, 1fr); gap: 20px; padding: 16px 0 8px; text-align: center; }
-  .hero-brand { align-items: center; gap: 14px; }
-  .mark { width: 96px; }
-  .hero h1 { font-size: 26px; }
+  /* Home: mark beside the name, intro, then location */
+  .view[data-view="home"] { padding-top: 32px; }
+  .banner { display: none; }
+  .hero { grid-template-columns: minmax(0, 1fr); gap: 20px; padding: 8px 0 0; text-align: center; }
+  .hero-brand { flex-direction: row; justify-content: center; align-items: center; gap: 12px; }
+  .mark { width: 64px; }
+  .hero h1 { font-size: 24px; }
   .hero-text { padding: 0; border: 0; }
   .intro p { font-size: 15px; }
   .intro p:last-child { margin-bottom: 0; }
   .hero-text .btn { display: none; }
 
-  .home-extra { display: block; }
-  .home-extra .block { padding: 32px 0 0; margin-top: 32px; border-top: 1px solid var(--border); }
+  .home-extra { display: block; padding-top: 32px; margin-top: 32px; border-top: 1px solid var(--border); }
   .home-extra h2 { margin-bottom: 20px; }
-  .home-extra .muted { margin: 0 0 16px; font-size: 15px; }
+
+  /* Floating apply button, bottom right */
+  .fab {
+    display: inline-flex; align-items: center;
+    position: fixed; z-index: 25;
+    right: calc(16px + env(safe-area-inset-right, 0px));
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    padding: 13px 22px;
+    border-radius: 999px;
+    background: var(--text); color: var(--bg);
+    font-size: 15px; font-weight: 600;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .18);
+  }
+  .footer { padding-bottom: 96px; }  /* room so the floating button doesn't cover it */
 
   .director { grid-template-columns: minmax(0, 1fr); gap: 20px; }
   .photo { width: 120px; }

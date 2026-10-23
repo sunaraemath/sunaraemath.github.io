@@ -47,6 +47,11 @@
   <main class="page">
     <!-- 홈 -->
     <section class="view" data-view="home">
+      <!-- PC 전용: 오른쪽 대각선 사진 -->
+      <div class="banner">
+        <div class="banner-photo" data-site="heroPhoto">학원 사진 자리</div>
+      </div>
+
       <div class="hero">
         <div class="hero-brand">
           <img class="mark" data-site="mark" alt="">
@@ -60,15 +65,8 @@
 
       <!-- 모바일 홈에서만 보이는 부분 -->
       <div class="home-extra">
-        <div class="block">
-          <h2>오시는 길</h2>
-          <div data-site="location"></div>
-        </div>
-        <div class="block">
-          <h2>상담 신청</h2>
-          <p class="muted" data-site="applyLead"></p>
-          <a class="btn btn-wide" href="#apply">상담 신청하기</a>
-        </div>
+        <h2>오시는 길</h2>
+        <div data-site="location"></div>
       </div>
     </section>
 
@@ -237,6 +235,9 @@
 
     <footer class="footer" data-site="footer"></footer>
   </main>
+
+  <!-- 모바일 전용: 오른쪽 아래 떠 있는 상담 신청 버튼 -->
+  <a class="fab" href="#apply">상담 신청</a>
 
   <script src="content.js"></script>
   <script src="site.js"></script>
