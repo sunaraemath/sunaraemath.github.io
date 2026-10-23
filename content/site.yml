@@ -18,7 +18,7 @@ intro: "[학원 소개 문구가 들어갈 자리입니다.]"
 
 # ----- 원장 소개 -----
 director:
-  name: "[원장 이름]"
+  name: "오 영 창"
   title: 원장
   photo: ""             # 예: images/director.jpg (비워두면 회색 칸)
   career:               # 약력. 줄을 늘리거나 줄여도 됩니다.
