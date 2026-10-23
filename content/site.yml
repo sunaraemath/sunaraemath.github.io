@@ -11,7 +11,7 @@
 name: 수나래 수학학원
 short_name: 
 mark: images/mark.png
-main_photo: "image/수나래 전경.png"          # PC 첫 화면 사진. 예: images/main.jpg (비워두면 회색 칸)
+main_photo: "image/sunarae.png"          # PC 첫 화면 사진. 예: images/main.jpg (비워두면 회색 칸)
 
 # ----- 홈 -----
 intro: "[학원 소개 문구가 들어갈 자리입니다.]"
