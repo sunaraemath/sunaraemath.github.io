@@ -7,7 +7,6 @@
   --faint: #a1a1a6;
   --border: #e5e5ea;
   --hairline: #f0f0f2;
-  --danger: #c4372f;
   --serif: "Noto Serif KR", Georgia, serif;
   --sans: "Pretendard", system-ui, -apple-system, "Apple SD Gothic Neo", sans-serif;
   --page-w: 1040px;
@@ -57,11 +56,14 @@ h1, h2, .brand, .person { font-family: var(--serif); font-weight: 600; letter-sp
 .nav a:hover { color: var(--text); }
 .nav a.active { color: var(--text); border-bottom-color: var(--text); }
 .nav .nav-cta {
-  color: var(--text);
+  color: var(--text); background: transparent;
   border: 1px solid var(--text); border-radius: 999px;
   padding: 5px 16px;
+  font: 500 15px/1.7 var(--sans);
+  cursor: pointer;
+  transition: background .15s, color .15s;
 }
-.nav .nav-cta:hover, .nav .nav-cta.active { background: var(--text); color: var(--bg); }
+.nav .nav-cta:hover { background: var(--text); color: var(--bg); }
 
 .menu-btn, .close-btn, .drawer, .scrim, .fab { display: none; }
 
@@ -102,8 +104,6 @@ h2::after {
   transition: opacity .15s;
 }
 .btn:hover { opacity: .85; }
-.btn-ghost { background: transparent; color: var(--text); }
-.btn-wide { width: 100%; }
 :focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
 
 /* ----- Home ----- */
@@ -189,70 +189,39 @@ h2::after {
 }
 .map-links a:hover { border-color: var(--text); }
 
-/* ----- Form ----- */
-.form { max-width: 560px; }
-fieldset { border: 0; margin: 0 0 36px; padding: 0; }
-legend {
-  padding: 0; margin-bottom: 16px;
-  font-size: 12px; font-weight: 600; letter-spacing: .08em;
-  color: var(--faint);
-}
-.field { margin-bottom: 18px; }
-.row { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 12px; }
-.field > label, .label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 6px; }
-.opt { color: var(--faint); font-weight: 400; font-size: 12px; margin-left: 4px; }
-
-input:not([type="radio"]):not([type="checkbox"]), select, textarea {
-  width: 100%;
-  padding: 11px 14px;
-  border: 1px solid var(--border); border-radius: 8px;
+/* ----- Apply popup ----- */
+.apply-dialog {
+  width: min(400px, calc(100vw - 32px));
+  padding: 32px 28px 28px;
+  border: 0; border-radius: 16px;
   background: var(--bg); color: var(--text);
-  font: 16px/1.5 var(--sans);  /* 16px keeps iOS from zooming in */
-  transition: border-color .15s;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .2);
 }
-input:focus, select:focus, textarea:focus { outline: none; border-color: var(--text); }
-input::placeholder, textarea::placeholder { color: var(--faint); }
-textarea { resize: vertical; }
-select {
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236e6e73' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat; background-position: right 12px center; background-size: 16px;
-  padding-right: 36px;
+.apply-dialog::backdrop { background: rgba(0, 0, 0, .35); }
+.dialog-close {
+  position: absolute; top: 10px; right: 10px;
+  display: grid; place-items: center;
+  width: 40px; height: 40px;
+  border: 0; border-radius: 8px;
+  background: transparent; color: var(--muted);
+  cursor: pointer;
 }
-.chips + input { margin-top: 8px; }
-
-.chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.chip { position: relative; cursor: pointer; }
-.chip input { position: absolute; opacity: 0; pointer-events: none; }
-.chip span {
-  display: inline-block;
-  padding: 8px 18px;
-  border: 1px solid var(--border); border-radius: 999px;
-  font-size: 15px;
-  transition: background .15s, border-color .15s, color .15s;
+.dialog-close:hover { background: var(--surface); color: var(--text); }
+.dialog-close svg { width: 20px; height: 20px; }
+.dialog-title { margin: 0; font: 600 22px/1.3 var(--serif); }
+.dialog-lead { margin: 8px 0 24px; font-size: 15px; }
+.apply-choices { display: grid; gap: 10px; }
+.choice {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 20px;
+  border: 1px solid var(--border); border-radius: 12px;
+  font-size: 17px; font-weight: 600;
+  transition: border-color .15s, background .15s;
 }
-.chip:hover span { border-color: var(--muted); }
-.chip input:checked + span { background: var(--text); border-color: var(--text); color: var(--bg); }
-.chip input:focus-visible + span { outline: 2px solid var(--text); outline-offset: 2px; }
-
-.err { margin: 6px 0 0; color: var(--danger); font-size: 13px; }
-.err:empty { display: none; }
-.invalid { border-color: var(--danger) !important; }
-
-.consent { padding: 20px; margin-bottom: 20px; background: var(--surface); border-radius: 8px; }
-.privacy { margin: 0 0 14px; padding: 0; list-style: none; color: var(--muted); font-size: 13px; line-height: 1.7; }
-.check { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 500; cursor: pointer; }
-.check input { width: 18px; height: 18px; accent-color: var(--text); }
-
-.hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
-
-.form-status { margin: 12px 0 0; font-size: 14px; color: var(--muted); text-align: center; }
-.form-status:empty { display: none; }
-.form-status.error { color: var(--danger); }
-.form button[disabled] { opacity: .5; cursor: default; }
-
-.done { padding: 32px 0; }
-.done .btn { margin-top: 12px; }
+a.choice:hover { border-color: var(--text); background: var(--surface); }
+.choice svg { width: 20px; height: 20px; color: var(--muted); }
+.choice.is-empty { color: var(--faint); }
+.choice small { font-size: 13px; font-weight: 500; }
 
 /* ----- Footer ----- */
 .footer { padding: 24px 0 40px; border-top: 1px solid var(--border); color: var(--faint); font-size: 13px; }
@@ -286,10 +255,13 @@ select {
   .menu-open .drawer { transform: none; visibility: visible; }
   .close-btn { position: absolute; top: 6px; right: 8px; }
   .drawer nav { display: flex; flex-direction: column; }
-  .drawer nav a {
+  .drawer nav a, .drawer nav button {
     padding: 14px 4px;
-    border-bottom: 1px solid var(--hairline);
-    font-size: 17px; font-weight: 500;
+    border: 0; border-bottom: 1px solid var(--hairline);
+    background: transparent; color: var(--text);
+    font: 500 17px/1.7 var(--sans);
+    text-align: left;
+    cursor: pointer;
   }
   .drawer nav a.active { font-weight: 700; }
 
@@ -323,9 +295,10 @@ select {
     right: calc(16px + env(safe-area-inset-right, 0px));
     bottom: calc(20px + env(safe-area-inset-bottom, 0px));
     padding: 13px 22px;
-    border-radius: 999px;
+    border: 0; border-radius: 999px;
     background: var(--text); color: var(--bg);
-    font-size: 15px; font-weight: 600;
+    font: 600 15px/1.4 var(--sans);
+    cursor: pointer;
     box-shadow: 0 4px 14px rgba(0, 0, 0, .18);
   }
   .footer { padding-bottom: 96px; }  /* room so the floating button doesn't cover it */
@@ -334,7 +307,6 @@ select {
   .photo { width: 120px; }
   .class-item { grid-template-columns: minmax(0, 1fr); gap: 4px; padding: 18px 0; }
   .loc { grid-template-columns: minmax(0, 1fr); gap: 20px; }
-  .form { max-width: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
