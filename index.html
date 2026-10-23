@@ -107,17 +107,17 @@
   <!-- 모바일 전용: 오른쪽 아래 떠 있는 상담 신청 버튼 -->
   <button type="button" class="fab" data-apply>상담 신청</button>
 
-  <!-- 상담 신청: 반을 고르면 네이버 폼으로 이동 -->
+  <!-- 상담 신청: 안내 문구 + 네이버 폼 버튼 -->
   <dialog class="apply-dialog" aria-labelledby="apply-title">
     <button class="dialog-close" type="button" aria-label="닫기">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
     </button>
-    <p class="dialog-title" id="apply-title">상담 신청</p>
-    <p class="muted dialog-lead" data-site="applyLead"></p>
-    <div class="apply-choices" data-site="applyForms"></div>
+    <p class="dialog-title" id="apply-title" data-site="applyTitle"></p>
+    <div class="dialog-text" data-site="applyText"></div>
+    <a class="btn dialog-btn" data-site="applyLink" target="_blank" rel="noopener"></a>
   </dialog>
 
-  <script src="content.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
   <script src="site.js"></script>
 </body>
 </html>
