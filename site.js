@@ -65,11 +65,10 @@
       </div>`);
 
     const A = S.apply || {};
-    fill("applyTitle", esc(A.title));
-    fill("applyText", paras(A.text));
-    const applyLink = $('[data-site="applyLink"]');
-    applyLink.textContent = A.button || "상담 신청서 작성하기";
-    applyLink.href = A.link || "#";
+    $$("[data-apply]").forEach(a => {
+      if (A.button) a.textContent = A.button;
+      if (A.link) a.href = A.link;
+    });
   }
 
   // ----- Pages (one view at a time, chosen by the #hash) -----
@@ -85,7 +84,6 @@
     document.title = titles[view] ? `${titles[view]} · ${siteName}` : siteName;
     closeMenu();
     window.scrollTo(0, 0);
-    if (id === "apply") openApply();  // a shared link ending in #apply opens the popup right away
   }
 
   // ----- Mobile menu -----
@@ -108,17 +106,7 @@
   scrim.addEventListener("click", closeMenu);
   document.addEventListener("keydown", e => { if (e.key === "Escape") closeMenu(); });
 
-  // ----- Apply popup: short note + button to the Naver form -----
-  const dialog = $(".apply-dialog");
-
-  function openApply() {
-    closeMenu();
-    if (!dialog.open) dialog.showModal();
-  }
-  $$("[data-apply]").forEach(b => b.addEventListener("click", openApply));
-  $(".dialog-close").addEventListener("click", () => dialog.close());
-  dialog.addEventListener("click", e => { if (e.target === dialog) dialog.close(); });  // click outside the box
-  $('[data-site="applyLink"]').addEventListener("click", () => dialog.close());
+  $$("[data-apply]").forEach(a => a.addEventListener("click", closeMenu));
 
   // Each page opens at the top instead of the browser's remembered position
   history.scrollRestoration = "manual";
