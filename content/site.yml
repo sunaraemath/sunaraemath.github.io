@@ -9,7 +9,7 @@
 # - 여러 줄 글( | 표시가 있는 항목)은 빈 줄로 문단을 나눕니다.
 
 name: 수나래 수학학원
-short_name: 수나래 수학
+short_name: 
 mark: images/mark.png
 main_photo: ""          # PC 첫 화면 사진. 예: images/main.jpg (비워두면 회색 칸)
 
