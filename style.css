@@ -7,8 +7,7 @@
   --faint: #a1a1a6;
   --border: #e5e5ea;
   --hairline: #f0f0f2;
-  --navy: #1e2d4f;
-  --brand: #1a4fd6;  /* vivid blue for the academy name */
+  --navy: #1b3a9e;  /* vivid navy for the shape beside the main photo */
   --serif: "Noto Serif KR", Georgia, serif;
   --sans: "Pretendard", system-ui, -apple-system, "Apple SD Gothic Neo", sans-serif;
   --page-w: 1040px;
@@ -143,7 +142,6 @@ h2::after {
   display: flex; flex-direction: column;
   margin: 0;
   font-size: 40px; line-height: 1.2;
-  color: var(--brand);
 }
 .hero-text { padding-left: 48px; border-left: 1px solid var(--border); }
 .intro p { margin: 0 0 14px; color: var(--muted); font-size: 17px; line-height: 1.8; }
