@@ -52,14 +52,14 @@ classes:
 
 # ----- 오시는 길 -----
 location:
-  address: "[도로명 주소]"
-  detail: "[건물 이름, 층수]"
+  address: "전남광주 나주시 그린로 339"
+  detail: "리버빌딩 504호"
   phone: 0507-1322-1732   # 누르면 전화가 걸립니다
   hours: "[운영 시간]"
-  map: ""                 # 약도 이미지. 예: images/map.png (비워두면 회색 칸)
+  map: "images/map.png"                 # 약도 이미지. 예: images/map.png (비워두면 회색 칸)
   # 지도 버튼: 비워두면 위 주소로 검색한 지도가 열립니다.
   # 지도 앱에서 "공유 > 링크 복사"한 주소를 넣으면 그 장소가 바로 열립니다.
-  naver_map: ""
+  naver_map: "https://naver.me/FO9LaZ1K"
   kakao_map: ""
 
 # ----- 상담 신청 버튼 (누르면 네이버 폼이 새 창으로 바로 열립니다) -----
