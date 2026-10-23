@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>수나래 수학학원</title>
+  <meta name="description" content="수나래 수학학원 — 초등·중등·고등 수학">
+  <meta name="color-scheme" content="light">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#home" data-site="shortName"></a>
+      <nav class="nav" aria-label="메뉴">
+        <a href="#home">홈</a>
+        <a href="#director">원장 소개</a>
+        <a href="#classes">수업 안내</a>
+        <a href="#location">오시는 길</a>
+        <a href="#apply" class="nav-cta">상담 신청</a>
+      </nav>
+      <button class="menu-btn" type="button" aria-label="메뉴 열기" aria-controls="menu" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- 모바일 메뉴 -->
+  <div class="scrim" hidden></div>
+  <aside class="drawer" id="menu" aria-label="메뉴">
+    <button class="close-btn" type="button" aria-label="메뉴 닫기">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+    <nav aria-label="모바일 메뉴">
+      <a href="#home">홈</a>
+      <a href="#director">원장 소개</a>
+      <a href="#classes">수업 안내</a>
+      <a href="#location">오시는 길</a>
+      <a href="#apply">상담 신청</a>
+    </nav>
+  </aside>
+
+  <main class="page">
+    <!-- 홈 -->
+    <section class="view" data-view="home">
+      <div class="hero">
+        <div class="hero-brand">
+          <img class="mark" data-site="mark" alt="">
+          <h1 data-site="name"></h1>
+        </div>
+        <div class="hero-text">
+          <div class="intro" data-site="intro"></div>
+          <a class="btn" href="#apply">상담 신청하기</a>
+        </div>
+      </div>
+
+      <!-- 모바일 홈에서만 보이는 부분 -->
+      <div class="home-extra">
+        <div class="block">
+          <h2>오시는 길</h2>
+          <div data-site="location"></div>
+        </div>
+        <div class="block">
+          <h2>상담 신청</h2>
+          <p class="muted" data-site="applyLead"></p>
+          <a class="btn btn-wide" href="#apply">상담 신청하기</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 원장 소개 -->
+    <section class="view" data-view="director" hidden>
+      <div class="split">
+        <h2>원장 소개</h2>
+        <div class="director">
+          <div class="photo" data-site="directorPhoto"></div>
+          <div>
+            <p class="person"><span data-site="directorName"></span> <span class="role" data-site="directorRole"></span></p>
+            <ul class="career" data-site="career"></ul>
+            <div class="message" data-site="message"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 수업 안내 -->
+    <section class="view" data-view="classes" hidden>
+      <div class="split">
+        <h2>수업 안내</h2>
+        <div class="classes" data-site="classes"></div>
+      </div>
+    </section>
+
+    <!-- 오시는 길 -->
+    <section class="view" data-view="location" hidden>
+      <div class="split">
+        <h2>오시는 길</h2>
+        <div data-site="location"></div>
+      </div>
+    </section>
+
+    <!-- 상담 신청 -->
+    <section class="view" data-view="apply" hidden>
+      <div class="split">
+        <div>
+          <h2>상담 신청</h2>
+          <p class="muted lead" data-site="applyLead"></p>
+        </div>
+
+        <div>
+        <form class="form" id="apply-form" novalidate>
+          <fieldset>
+            <legend>학생 정보</legend>
+            <div class="field">
+              <label for="f-name">성명</label>
+              <input id="f-name" name="name" autocomplete="name" placeholder="홍길동">
+              <p class="err" data-for="name"></p>
+            </div>
+            <div class="field">
+              <label for="f-phone">연락처</label>
+              <input id="f-phone" name="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="010-1234-5678">
+              <p class="err" data-for="phone"></p>
+            </div>
+            <div class="field">
+              <span class="label">성별</span>
+              <div class="chips" role="radiogroup" aria-label="성별">
+                <label class="chip"><input type="radio" name="gender" value="남"><span>남</span></label>
+                <label class="chip"><input type="radio" name="gender" value="여"><span>여</span></label>
+              </div>
+              <p class="err" data-for="gender"></p>
+            </div>
+            <div class="row">
+              <div class="field">
+                <label for="f-school">학교</label>
+                <input id="f-school" name="school" placeholder="수나래중학교">
+                <p class="err" data-for="school"></p>
+              </div>
+              <div class="field">
+                <label for="f-grade">학년</label>
+                <select id="f-grade" name="grade">
+                  <option value="">선택</option>
+                  <optgroup label="초등">
+                    <option>초1</option><option>초2</option><option>초3</option>
+                    <option>초4</option><option>초5</option><option>초6</option>
+                  </optgroup>
+                  <optgroup label="중등">
+                    <option>중1</option><option>중2</option><option>중3</option>
+                  </optgroup>
+                  <optgroup label="고등">
+                    <option>고1</option><option>고2</option><option>고3</option>
+                  </optgroup>
+                </select>
+                <p class="err" data-for="grade"></p>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>수학 현황</legend>
+            <div class="field">
+              <span class="label">진도</span>
+              <div class="chips" role="radiogroup" aria-label="진도">
+                <label class="chip"><input type="radio" name="progress" value="현행"><span>현행</span></label>
+                <label class="chip"><input type="radio" name="progress" value="선행"><span>선행</span></label>
+              </div>
+              <p class="err" data-for="progress"></p>
+            </div>
+            <div class="field" data-show-when="progress=선행" hidden>
+              <label for="f-advance">선행 진도</label>
+              <input id="f-advance" name="advance" placeholder="중3-1 진행 중">
+              <p class="err" data-for="advance"></p>
+            </div>
+            <div class="field">
+              <label for="f-score">수학 점수 <span class="opt">선택</span></label>
+              <input id="f-score" name="score" placeholder="1학기 기말 82점">
+            </div>
+            <div class="field">
+              <label for="f-other">다른 학원 시간 <span class="opt">선택</span></label>
+              <textarea id="f-other" name="otherAcademy" rows="2" placeholder="월·수 영어 17:00–19:00"></textarea>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>희망 수업</legend>
+            <div class="field">
+              <span class="label">수업 요일</span>
+              <div class="chips" role="radiogroup" aria-label="수업 요일">
+                <label class="chip"><input type="radio" name="days" value="월수금"><span>월수금</span></label>
+                <label class="chip"><input type="radio" name="days" value="화목토"><span>화목토</span></label>
+                <label class="chip"><input type="radio" name="days" value="토일"><span>토일</span></label>
+                <label class="chip"><input type="radio" name="days" value="기타"><span>기타</span></label>
+              </div>
+              <input name="daysOther" aria-label="희망 요일 직접 입력" placeholder="희망 요일을 적어주세요" data-show-when="days=기타" hidden>
+              <p class="err" data-for="days"></p>
+            </div>
+            <div class="field">
+              <span class="label">희망 시간</span>
+              <div class="chips" role="radiogroup" aria-label="희망 시간">
+                <label class="chip"><input type="radio" name="hours" value="주 12시간"><span>주 12시간</span></label>
+                <label class="chip"><input type="radio" name="hours" value="주 6시간"><span>주 6시간</span></label>
+                <label class="chip"><input type="radio" name="hours" value="기타"><span>기타</span></label>
+              </div>
+              <input name="hoursOther" aria-label="희망 시간 직접 입력" placeholder="희망 시간을 적어주세요" data-show-when="hours=기타" hidden>
+              <p class="err" data-for="hours"></p>
+            </div>
+            <div class="field">
+              <label for="f-friend">같이 다니고 싶은 재원생 <span class="opt">선택</span></label>
+              <input id="f-friend" name="friend" placeholder="이름 (학교·학년)">
+            </div>
+          </fieldset>
+
+          <div class="consent">
+            <ul class="privacy" data-site="privacy"></ul>
+            <label class="check"><input type="checkbox" name="consent" id="f-consent"> 개인정보 수집·이용에 동의합니다</label>
+            <p class="err" data-for="consent"></p>
+          </div>
+
+          <!-- 스팸 방지용 칸 (사람에게는 보이지 않음) -->
+          <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+          <button class="btn btn-wide" type="submit">신청서 보내기</button>
+          <p class="form-status" role="status"></p>
+        </form>
+
+        <div class="done" hidden>
+          <p class="person">신청이 접수되었습니다</p>
+          <p class="muted">확인 후 남겨주신 연락처로 연락드리겠습니다.</p>
+          <a class="btn btn-ghost" href="#home">홈으로</a>
+        </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer" data-site="footer"></footer>
+  </main>
+
+  <script src="content.js"></script>
+  <script src="site.js"></script>
+</body>
+</html>
