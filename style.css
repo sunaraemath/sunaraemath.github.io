@@ -84,11 +84,11 @@ h2::after {
   margin-top: 12px;
 }
 
-/* Title on the left, content on the right */
+/* Title on top, content below */
 .split {
   display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
-  gap: 48px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 36px;
 }
 .split > * { min-width: 0; }
 .lead { font-size: 15px; margin: 20px 0 0; }
