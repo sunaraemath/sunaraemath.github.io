@@ -47,6 +47,7 @@
     .cal .today { border: 2px solid var(--acc); padding: 1px 2px; }
     .cal .dn { display: block; width: fit-content; font-weight: 600; font-size: 13px; }
     .cal .today .dn { background: var(--tx); color: #fff; border-radius: 4px; padding: 0 3px; }
+    .cal .rpd { opacity: .45; }
     .cal .cv { color: var(--tx3); font-size: 11px; }
     .hw { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; margin-top: 10px; }
     .hw h2 { font-size: 15px; font-weight: 600; margin: 0 0 2px; }
@@ -161,17 +162,22 @@
         (c.in ? '<span class="mu">' + monthNo(addMonths(ym, -1)) + '월에서 이월 ' + r1(c.in) + '시간 포함</span>' : '') +
         (c.out ? '<span class="mu">' + monthNo(addMonths(ym, 1)) + '월로 이월 ' + r1(c.out) + '시간</span>' : '') + '</div>';
       h += '<div class="cal">' + DOW.map((x, k) => '<div class="h' + (k ? '' : ' sun') + '">' + x + '</div>').join('');
-      for (let k = 0; k < dowOf(ym + '-01'); k++) h += '<div class="blank"></div>';
-      monthDates(ym).forEach(ds => {
+      // 지난달에서 이월된 날은 이번 달 달력 앞에도 보여 줍니다
+      const prev = monthDates(addMonths(ym, -1)), carryIn = prev.filter(ds => isCarry(ds) && slotsOf(S.sid, ds).length);
+      const start = carryIn.length ? carryIn[0] : ym + '-01';
+      for (let k = 0; k < dowOf(start); k++) h += '<div class="blank"></div>';
+      prev.filter(ds => ds >= start).concat(monthDates(ym)).forEach(ds => {
+        const inC = ds.slice(0, 7) !== ym;
+        if (inC && carryIn.indexOf(ds) < 0) { h += '<div class="blank"></div>'; return; }
         const sl = slotsOf(S.sid, ds), hh = holOf(ds), off = hh && hh.type === '휴강';
-        let body = off ? esc(hh.reason) || '휴강' : sl.length ? sl.map(x => '<div' + (x.bk ? ' class="bk"' : '') + '>' + f12(x.start) + '<wbr>~' + f12(x.end) + '</div>').join('') : '-';
-        if (hh && hh.type === '이월') body += '<div class="cv">→' + monthNo(addMonths(ym, 1)) + '월</div>';
+        let body = off ? esc(hh.reason) || '휴강' : sl.length ? sl.map(x => '<div' + (x.rp ? ' class="rpd"' : x.bk ? ' class="bk"' : '') + '>' + f12(x.start) + '<wbr>~' + f12(x.end) + '</div>').join('') : '-';
+        if (hh && hh.type === '이월') body += '<div class="cv">' + (inC ? monthNo(addMonths(ym, -1)) + '월에서' : '→' + monthNo(addMonths(ym, 1)) + '월') + '</div>';
         const cls = [off ? 'off' : '', hh && hh.type === '특별' ? 'sp' : '', !sl.length && !off ? 'none' : '', ds === d.today ? 'today' : ''].join(' ');
-        h += '<div class="' + cls + '"><span class="dn">' + Number(ds.slice(8)) + '</span>' + body + '</div>';
+        h += '<div class="' + cls + '"><span class="dn">' + (inC ? monthNo(ds.slice(0, 7)) + '/' + Number(ds.slice(8)) : Number(ds.slice(8))) + '</span>' + body + '</div>';
       });
       const hw = d.hw.filter(x => x.sid === S.sid).sort((a, b) => (a.date < b.date ? -1 : 1));
       h += '</div><section class="hw"><h2>남은 숙제</h2>' + (hw.length ? hw.map(x => '<div>남은 <b>' + esc(x.remain) + '</b>문제' + (x.reason ? ' <span class="mu">· ' + esc(x.reason) + '</span>' : '') + '</div>').join('') : '<div class="mu">남은 숙제가 없습니다.</div>') + '</section>';
-      return h + '<div class="legend"><span class="bk">파랑 = 보강</span> · 빨강 = 휴강 · 노랑 = 특별 수업 · →다음 달 = 그날 시간은 다음 달 총합으로</div>';
+      return h + '<div class="legend"><span class="bk">파랑 = 보강</span> · 빨강 = 휴강 · 노랑 = 특별 수업 · <span class="rpd">흐린 시간 = 수업 대체</span> · →다음 달 = 그날 시간은 다음 달 총합으로</div>';
     }
 
     app.addEventListener('submit', e => {
