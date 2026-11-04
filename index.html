@@ -89,6 +89,17 @@
     const slotsOf = (sid, ds) => S.data.slots.filter(x => x.sid === sid && x.date === ds).sort((a, b) => toMin(a.start) - toMin(b.start));
     const isCarry = ds => { const h = holOf(ds); return !!h && h.type === '이월'; };
 
+    /** 끝과 시작이 맞닿은 수업을 하나로 합칩니다. 보강이 들어 있으면 bk, 수업 대체는 합치지 않습니다. */
+    function mergeRuns(sl) {
+      const out = [];
+      sl.forEach(x => {
+        const last = out[out.length - 1];
+        if (last && !x.rp && !last.rp && last.end === x.start) { last.end = x.end; last.bk = last.bk || x.bk; }
+        else out.push({ start: x.start, end: x.end, bk: x.bk, rp: x.rp });
+      });
+      return out;
+    }
+
     /** 그 달 총합으로 세는 기본·보강 시간. 관리 프로그램의 개인 시간표와 같은 규칙입니다. */
     function counted(sid, ym) {
       const r = { base: 0, bk: 0, out: 0, in: 0 };
@@ -148,6 +159,7 @@
     function viewTable() {
       const d = S.data, list = d.students.slice().sort((a, b) => a.name.localeCompare(b.name, 'ko'));
       const names = list.map(s => '<option value="' + esc(s.id) + '"' + (s.id === S.sid ? ' selected' : '') + '>' + esc(s.name) + '</option>').join('');
+      if (!list.length) return '<div class="box msg">아직 공개된 시간표가 없습니다.</div>';
       if (!S.sid) {
         return '<div class="box"><h1>수나래 시간표(학생용)</h1><select id="stu" aria-label="이름 선택"><option value="">이름을 선택하세요</option>' + names + '</select></div>';
       }
@@ -170,7 +182,7 @@
         const inC = ds.slice(0, 7) !== ym;
         if (inC && carryIn.indexOf(ds) < 0) { h += '<div class="blank"></div>'; return; }
         const sl = slotsOf(S.sid, ds), hh = holOf(ds), off = hh && hh.type === '휴강';
-        let body = off ? esc(hh.reason) || '휴강' : sl.length ? sl.map(x => '<div' + (x.rp ? ' class="rpd"' : x.bk ? ' class="bk"' : '') + '>' + f12(x.start) + '<wbr>~' + f12(x.end) + '</div>').join('') : '-';
+        let body = off ? esc(hh.reason) || '휴강' : sl.length ? mergeRuns(sl).map(x => '<div' + (x.rp ? ' class="rpd"' : x.bk ? ' class="bk"' : '') + '>' + f12(x.start) + '<wbr>~' + f12(x.end) + '</div>').join('') : '-';
         if (hh && hh.type === '이월') body += '<div class="cv">' + (inC ? monthNo(addMonths(ym, -1)) + '월에서' : '→' + monthNo(addMonths(ym, 1)) + '월') + '</div>';
         const cls = [off ? 'off' : '', hh && hh.type === '특별' ? 'sp' : '', !sl.length && !off ? 'none' : '', ds === d.today ? 'today' : ''].join(' ');
         h += '<div class="' + cls + '"><span class="dn">' + (inC ? monthNo(ds.slice(0, 7)) + '/' + Number(ds.slice(8)) : Number(ds.slice(8))) + '</span>' + body + '</div>';
