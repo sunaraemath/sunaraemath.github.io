@@ -1,113 +1,208 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>수나래 수학학원</title>
-  <meta name="description" content="수나래 수학학원 — 초등·중등·고등 수학">
-  <meta name="color-scheme" content="light">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
-  <link rel="stylesheet" href="style.css?v=3">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="apple-mobile-web-app-title" content="수나래 시간표">
+  <title>수나래 시간표(학생용)</title>
+  <style>
+    :root {
+      --bg: #f6f6f4; --card: #fff; --line: #e6e5e0; --line2: #cfcdc6;
+      --tx: #1f1f1d; --tx2: #6b6a65; --tx3: #9b9a94;
+      --acc: #185fa5; --red: #a32d2d; --red-bg: #fcebeb; --warn-bg: #faeeda;
+      --r: 8px;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { -webkit-text-size-adjust: 100%; }
+    body { margin: 0; background: var(--bg); color: var(--tx); font: 16px/1.5 -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif; }
+    button, input, select { font: inherit; color: inherit; }
+    button { background: var(--card); border: 1px solid var(--line2); border-radius: var(--r); padding: 4px 11px; cursor: pointer; }
+    button:disabled { color: var(--line2); cursor: default; }
+    button.pri { background: var(--tx); color: #fff; border-color: var(--tx); padding: 9px 12px; width: 100%; }
+    input, select { border: 1px solid var(--line2); border-radius: var(--r); padding: 7px 10px; background: #fff; }
+    main { max-width: 560px; margin: 0 auto; padding: 12px 10px calc(32px + env(safe-area-inset-bottom)); }
+    h1 { font-size: 20px; font-weight: 700; margin: 0 0 14px; }
+    .box { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 18px 16px; margin-top: 48px; }
+    .box input, .box select { width: 100%; margin-bottom: 10px; }
+    .msg { color: var(--tx2); }
+    .err { color: var(--red); font-size: 14px; min-height: 21px; margin-top: 6px; }
+    .head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .head select { min-width: 0; flex: 0 1 130px; font-weight: 600; }
+    .nav { display: flex; align-items: center; gap: 6px; flex: none; }
+    .nav b { white-space: nowrap; }
+    .sum { display: flex; flex-wrap: wrap; gap: 2px 12px; margin-bottom: 10px; font-size: 15px; }
+    .mu { color: var(--tx2); }
+    .bk { color: var(--acc); }
+    .short { color: var(--red); }
+    .cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; font-size: 12px; line-height: 1.3; }
+    .cal > div { background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 2px 3px; min-height: 58px; overflow-wrap: anywhere; }
+    .cal .h { background: none; border: none; min-height: 0; text-align: center; color: var(--tx2); font-size: 14px; }
+    .cal .sun { color: var(--red); }
+    .cal .blank { background: none; border: none; }
+    .cal .none { color: var(--tx3); }
+    .cal .off { background: var(--red-bg); color: var(--red); }
+    .cal .sp { background: var(--warn-bg); }
+    .cal .today { border: 2px solid var(--acc); padding: 1px 2px; }
+    .cal .dn { display: block; width: fit-content; font-weight: 600; font-size: 13px; }
+    .cal .today .dn { background: var(--tx); color: #fff; border-radius: 4px; padding: 0 3px; }
+    .cal .cv { color: var(--tx3); font-size: 11px; }
+    .hw { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; margin-top: 10px; }
+    .hw h2 { font-size: 15px; font-weight: 600; margin: 0 0 2px; }
+    .hw div { padding: 5px 0; border-top: 1px solid var(--line); overflow-wrap: anywhere; }
+    .legend { color: var(--tx2); font-size: 13px; margin-top: 10px; }
+    @media (min-width: 480px) { .cal { font-size: 14px; gap: 5px; } .cal > div { padding: 3px 6px; min-height: 72px; } }
+  </style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="topbar-inner">
-      <a class="brand" href="#home" data-site="shortName"></a>
-      <nav class="nav" aria-label="메뉴">
-        <a href="#home">홈</a>
-        <a href="#director">원장 소개</a>
-        <a href="#classes">수업 안내</a>
-        <a href="#location">오시는 길</a>
-        <a class="nav-cta" href="https://naver.me/xB77juJS" target="_blank" rel="noopener" data-apply>상담설문지 작성</a>
-      </nav>
-      <button class="menu-btn" type="button" aria-label="메뉴 열기" aria-controls="menu" aria-expanded="false">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-      </button>
-    </div>
-  </header>
+  <main id="app"><div class="box msg">불러오는 중…</div></main>
+  <script>
+    // Apps Script 배포 주소 (학생용 프로젝트의 웹 앱 URL)
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxI9TRLCPsv1BFKRfJxl2ZPFVk7Cs3zKe-_PI5H7u91h72-4ZpbogA6jO10JxN-8vy6Fw/exec';
 
-  <!-- 모바일 메뉴 -->
-  <div class="scrim" hidden></div>
-  <aside class="drawer" id="menu" aria-label="메뉴">
-    <button class="close-btn" type="button" aria-label="메뉴 닫기">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
-    </button>
-    <nav aria-label="모바일 메뉴">
-      <a href="#home">홈</a>
-      <a href="#director">원장 소개</a>
-      <a href="#classes">수업 안내</a>
-      <a href="#location">오시는 길</a>
-      <a class="drawer-cta" href="https://naver.me/xB77juJS" target="_blank" rel="noopener" data-apply>상담설문지 작성</a>
-    </nav>
-  </aside>
+    const DOW = ['일', '월', '화', '수', '목', '금', '토'];
+    const S = { pw: '', data: null, sid: '', ym: '', err: '', busy: false, tried: false, at: 0 };
+    const app = document.getElementById('app');
 
-  <main class="page">
-    <!-- 홈 -->
-    <section class="view" data-view="home">
-      <!-- PC 전용: 오른쪽 대각선 사진 -->
-      <div class="banner">
-        <div class="banner-photo" data-site="heroPhoto">학원 사진 자리</div>
-      </div>
+    // 기억해 두기: 사생활 보호 모드 등에서 저장이 막혀도 화면은 그대로 동작합니다
+    const store = {
+      get(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
+      set(k, v) { try { if (v) localStorage.setItem(k, v); else localStorage.removeItem(k); } catch (e) {} },
+    };
 
-      <div class="hero">
-        <div class="hero-brand">
-          <img class="mark" data-site="mark" alt="">
-          <h1 data-site="name"></h1>
-        </div>
-        <div class="hero-text">
-          <div class="intro" data-site="intro"></div>
-          <a class="btn" href="https://naver.me/xB77juJS" target="_blank" rel="noopener" data-apply>상담설문지 작성</a>
-        </div>
-      </div>
+    const pad = n => (n < 10 ? '0' : '') + n;
+    const parts = s => s.split('-').map(Number);
+    const r1 = x => Math.round(x * 10) / 10;
+    const toMin = t => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+    const hrs = s => (toMin(s.end) - toMin(s.start)) / 60;
+    function f12(t) { const [h, m] = t.split(':').map(Number); if (h < 12) return '오전 ' + h + ':' + pad(m); return (h > 12 ? h - 12 : h) + ':' + pad(m); }
+    function daysIn(ym) { const [y, m] = parts(ym); return new Date(Date.UTC(y, m, 0)).getUTCDate(); }
+    function dowOf(ds) { const [y, m, d] = parts(ds); return new Date(Date.UTC(y, m - 1, d)).getUTCDay(); }
+    function addMonths(ym, n) { const [y, m] = parts(ym); const t = new Date(Date.UTC(y, m - 1 + n, 1)); return t.getUTCFullYear() + '-' + pad(t.getUTCMonth() + 1); }
+    const monthNo = ym => Number(ym.slice(5));
+    const monthDates = ym => Array.from({ length: daysIn(ym) }, (_, i) => ym + '-' + pad(i + 1));
+    function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
-      <!-- 모바일 홈에서만 보이는 부분 -->
-      <div class="home-extra">
-        <h2>오시는 길</h2>
-        <div data-site="location"></div>
-      </div>
-    </section>
+    const holOf = ds => S.data.holidays.find(h => h.date === ds);
+    const slotsOf = (sid, ds) => S.data.slots.filter(x => x.sid === sid && x.date === ds).sort((a, b) => toMin(a.start) - toMin(b.start));
+    const isCarry = ds => { const h = holOf(ds); return !!h && h.type === '이월'; };
 
-    <!-- 원장 소개 -->
-    <section class="view" data-view="director" hidden>
-      <div class="split">
-        <h2>원장 소개</h2>
-        <div class="director">
-          <div class="photo" data-site="directorPhoto"></div>
-          <div>
-            <p class="person"><span data-site="directorName"></span> <span class="role" data-site="directorRole"></span></p>
-            <ul class="career" data-site="career"></ul>
-            <div class="message" data-site="message"></div>
-          </div>
-        </div>
-      </div>
-    </section>
+    /** 그 달 총합으로 세는 기본·보강 시간. 관리 프로그램의 개인 시간표와 같은 규칙입니다. */
+    function counted(sid, ym) {
+      const r = { base: 0, bk: 0, out: 0, in: 0 };
+      const add = (ds, key) => slotsOf(sid, ds).forEach(x => { r[x.bk ? 'bk' : 'base'] += hrs(x); if (key) r[key] += hrs(x); });
+      monthDates(ym).forEach(ds => { if (isCarry(ds)) slotsOf(sid, ds).forEach(x => { r.out += hrs(x); }); else add(ds); });
+      monthDates(addMonths(ym, -1)).filter(isCarry).forEach(ds => add(ds, 'in'));
+      r.total = r.base + r.bk;
+      return r;
+    }
 
-    <!-- 수업 안내 -->
-    <section class="view" data-view="classes" hidden>
-      <div class="split">
-        <h2>수업 안내</h2>
-        <div class="classes" data-site="classes"></div>
-      </div>
-    </section>
+    async function fetchData(pw) {
+      const res = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ pw: pw }) });
+      if (!res.ok) throw new Error('network');
+      return res.json();
+    }
 
-    <!-- 오시는 길 -->
-    <section class="view" data-view="location" hidden>
-      <div class="split">
-        <h2>오시는 길</h2>
-        <div data-site="location"></div>
-      </div>
-    </section>
+    async function load(pw, quiet) {
+      S.busy = true;
+      if (!quiet) { S.err = ''; render(); }
+      try {
+        const d = await fetchData(pw);
+        if (d.ok) {
+          S.pw = pw; S.data = d; S.at = Date.now(); S.err = '';
+          store.set('sn_pw', pw);
+          const saved = S.sid || store.get('sn_sid');
+          S.sid = d.students.some(s => s.id === saved) ? saved : '';
+          if (d.months.indexOf(S.ym) < 0) S.ym = pickMonth(d);
+        } else if (d.denied) {
+          S.pw = ''; S.data = null; store.set('sn_pw', '');
+          S.err = pw && !quiet && S.tried ? '비밀번호가 맞지 않습니다.' : '';
+        } else {
+          S.err = d.error || '시간표를 불러오지 못했습니다.';
+        }
+      } catch (e) {
+        if (!quiet || !S.data) S.err = '시간표를 불러오지 못했습니다. 인터넷 연결을 확인하고 다시 시도하세요.';
+      }
+      S.busy = false;
+      render();
+    }
 
-    <footer class="footer" data-site="footer"></footer>
-  </main>
+    /** 처음 보여 줄 달: 이번 달, 없으면 이번 달에 가장 가까운 앞선 달, 그것도 없으면 첫 달 */
+    function pickMonth(d) {
+      const cur = d.today.slice(0, 7), past = d.months.filter(m => m <= cur);
+      return past.length ? past[past.length - 1] : (d.months[0] || '');
+    }
 
-  <!-- 모바일 전용: 오른쪽 아래 떠 있는 상담설문지 버튼 -->
-  <a class="fab" href="https://naver.me/xB77juJS" target="_blank" rel="noopener" data-apply>상담설문지 작성</a>
+    function render() {
+      if (S.data) { app.innerHTML = viewTable(); return; }
+      if (S.busy && !S.tried) { app.innerHTML = '<div class="box msg">불러오는 중…</div>'; return; }
+      const failed = S.err && S.err.indexOf('비밀번호') < 0;
+      app.innerHTML = '<div class="box"><h1>수나래 시간표(학생용)</h1><form id="login">' +
+        '<input id="pw" type="password" placeholder="비밀번호" autocomplete="current-password" aria-label="비밀번호">' +
+        '<button class="pri" type="submit"' + (S.busy ? ' disabled' : '') + '>' + (S.busy ? '확인 중…' : failed ? '다시 시도' : '시간표 보기') + '</button></form>' +
+        '<div class="err" role="alert">' + esc(S.err) + '</div></div>';
+    }
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
-  <script src="site.js?v=3"></script>
+    function viewTable() {
+      const d = S.data, list = d.students.slice().sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+      const names = list.map(s => '<option value="' + esc(s.id) + '"' + (s.id === S.sid ? ' selected' : '') + '>' + esc(s.name) + '</option>').join('');
+      if (!S.sid) {
+        return '<div class="box"><h1>수나래 시간표(학생용)</h1><select id="stu" aria-label="이름 선택"><option value="">이름을 선택하세요</option>' + names + '</select></div>';
+      }
+      if (!S.ym) {
+        return '<div class="head"><select id="stu" aria-label="이름 선택">' + names + '</select></div><div class="box msg" style="margin-top:12px">아직 올라온 시간표가 없습니다.</div>';
+      }
+      const ym = S.ym, i = d.months.indexOf(ym), c = counted(S.sid, ym), std = d.standards[ym], [y, m] = parts(ym);
+      let h = '<div class="head"><select id="stu" aria-label="이름 선택">' + names + '</select><div class="nav">' +
+        '<button data-m="-1" aria-label="이전 달"' + (i <= 0 ? ' disabled' : '') + '>‹</button><b>' + y + '년 ' + m + '월</b>' +
+        '<button data-m="1" aria-label="다음 달"' + (i >= d.months.length - 1 ? ' disabled' : '') + '>›</button></div></div>';
+      h += '<div class="sum"><span' + (c.base < std ? ' class="short"' : '') + '>기본 <b>' + r1(c.base) + '</b> <span class="mu">/ ' + std + '</span></span><span class="bk">보강 <b>' + r1(c.bk) + '</b></span><span>총 <b>' + r1(c.total) + '시간</b></span>' +
+        (c.in ? '<span class="mu">' + monthNo(addMonths(ym, -1)) + '월에서 이월 ' + r1(c.in) + '시간 포함</span>' : '') +
+        (c.out ? '<span class="mu">' + monthNo(addMonths(ym, 1)) + '월로 이월 ' + r1(c.out) + '시간</span>' : '') + '</div>';
+      h += '<div class="cal">' + DOW.map((x, k) => '<div class="h' + (k ? '' : ' sun') + '">' + x + '</div>').join('');
+      for (let k = 0; k < dowOf(ym + '-01'); k++) h += '<div class="blank"></div>';
+      monthDates(ym).forEach(ds => {
+        const sl = slotsOf(S.sid, ds), hh = holOf(ds), off = hh && hh.type === '휴강';
+        let body = off ? esc(hh.reason) || '휴강' : sl.length ? sl.map(x => '<div' + (x.bk ? ' class="bk"' : '') + '>' + f12(x.start) + '<wbr>~' + f12(x.end) + '</div>').join('') : '-';
+        if (hh && hh.type === '이월') body += '<div class="cv">→' + monthNo(addMonths(ym, 1)) + '월</div>';
+        const cls = [off ? 'off' : '', hh && hh.type === '특별' ? 'sp' : '', !sl.length && !off ? 'none' : '', ds === d.today ? 'today' : ''].join(' ');
+        h += '<div class="' + cls + '"><span class="dn">' + Number(ds.slice(8)) + '</span>' + body + '</div>';
+      });
+      const hw = d.hw.filter(x => x.sid === S.sid).sort((a, b) => (a.date < b.date ? -1 : 1));
+      h += '</div><section class="hw"><h2>남은 숙제</h2>' + (hw.length ? hw.map(x => '<div>남은 <b>' + esc(x.remain) + '</b>문제' + (x.reason ? ' <span class="mu">· ' + esc(x.reason) + '</span>' : '') + '</div>').join('') : '<div class="mu">남은 숙제가 없습니다.</div>') + '</section>';
+      return h + '<div class="legend"><span class="bk">파랑 = 보강</span> · 빨강 = 휴강 · 노랑 = 특별 수업 · →다음 달 = 그날 시간은 다음 달 총합으로</div>';
+    }
+
+    app.addEventListener('submit', e => {
+      e.preventDefault();
+      // 연결 실패 뒤 다시 시도할 때는 기억해 둔 비밀번호를 그대로 씁니다
+      const pw = document.getElementById('pw').value.trim() || store.get('sn_pw');
+      if (!pw) { S.err = '비밀번호를 입력하세요.'; render(); return; }
+      S.tried = true;
+      load(pw);
+    });
+    app.addEventListener('change', e => {
+      if (e.target.id !== 'stu') return;
+      S.sid = e.target.value;
+      store.set('sn_sid', S.sid);
+      render();
+    });
+    app.addEventListener('click', e => {
+      const b = e.target.closest('[data-m]');
+      if (!b || b.disabled) return;
+      S.ym = S.data.months[S.data.months.indexOf(S.ym) + Number(b.dataset.m)];
+      render();
+    });
+    // 오래 켜 둔 화면으로 돌아오면 최신 시간표로 바꿉니다
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && S.data && !S.busy && Date.now() - S.at > 300000) load(S.pw, true);
+    });
+
+    (function init() {
+      const pw = store.get('sn_pw');
+      if (pw) { load(pw); } else render();
+    })();
+  </script>
 </body>
 </html>
