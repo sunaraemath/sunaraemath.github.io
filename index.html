@@ -30,6 +30,8 @@
     .err { color: var(--red); font-size: 14px; min-height: 21px; margin-top: 6px; }
     .head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
     .head select { min-width: 0; flex: 0 1 130px; font-weight: 600; }
+    .cls { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+    .cls .on { background: #efeee9; border-color: var(--tx2); font-weight: 600; }
     .nav { display: flex; align-items: center; gap: 6px; flex: none; }
     .nav b { white-space: nowrap; }
     .sum { display: flex; flex-wrap: wrap; gap: 2px 12px; margin-bottom: 10px; font-size: 15px; }
@@ -63,7 +65,7 @@
     const API_URL = 'https://script.google.com/macros/s/AKfycbxI9TRLCPsv1BFKRfJxl2ZPFVk7Cs3zKe-_PI5H7u91h72-4ZpbogA6jO10JxN-8vy6Fw/exec';
 
     const DOW = ['일', '월', '화', '수', '목', '금', '토'];
-    const S = { pw: '', data: null, sid: '', ym: '', err: '', busy: false, tried: false, at: 0 };
+    const S = { pw: '', data: null, sid: '', cls: '', ym: '', err: '', busy: false, tried: false, at: 0 };
     const app = document.getElementById('app');
 
     // 기억해 두기: 사생활 보호 모드 등에서 저장이 막혀도 화면은 그대로 동작합니다
@@ -85,6 +87,8 @@
     const monthDates = ym => Array.from({ length: daysIn(ym) }, (_, i) => ym + '-' + pad(i + 1));
     function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
+    /** 공개된 학생이 있는 반만 (서버가 예전 버전이면 빈 목록) */
+    const classes = () => ['원장반', '희진쌤', '혜성쌤'].filter(c => S.data.students.some(s => s.cls === c));
     const holOf = ds => S.data.holidays.find(h => h.date === ds);
     const slotsOf = (sid, ds) => S.data.slots.filter(x => x.sid === sid && x.date === ds).sort((a, b) => toMin(a.start) - toMin(b.start));
     const isCarry = ds => { const h = holOf(ds); return !!h && h.type === '이월'; };
@@ -126,6 +130,8 @@
           store.set('sn_pw', pw);
           const saved = S.sid || store.get('sn_sid');
           S.sid = d.students.some(s => s.id === saved) ? saved : '';
+          const c = S.cls || store.get('sn_cls');
+          S.cls = classes().indexOf(c) >= 0 ? c : '';
           if (d.months.indexOf(S.ym) < 0) S.ym = pickMonth(d);
         } else if (d.denied) {
           S.pw = ''; S.data = null; store.set('sn_pw', '');
@@ -157,19 +163,22 @@
     }
 
     function viewTable() {
-      const d = S.data, list = d.students.slice().sort((a, b) => a.name.localeCompare(b.name, 'ko'));
-      const names = list.map(s => '<option value="' + esc(s.id) + '"' + (s.id === S.sid ? ' selected' : '') + '>' + esc(s.name) + '</option>').join('');
+      const d = S.data, list = d.students.slice().sort((a, b) => a.name.localeCompare(b.name, 'ko')), cl = classes();
+      const shown = list.filter(s => !S.cls || s.cls === S.cls), cur = list.find(s => s.id === S.sid), inList = shown.some(s => s.id === S.sid);
+      const bar = cl.length ? '<div class="cls">' + cl.concat('').map(c => '<button data-c="' + c + '"' + (c === S.cls ? ' class="on"' : '') + '>' + (c || '전체') + '</button>').join('') + '</div>' : '';
+      const names = (S.sid && !inList ? '<option value="" selected>이름 선택</option>' : '') + shown.map(s => '<option value="' + esc(s.id) + '"' + (s.id === S.sid ? ' selected' : '') + '>' + esc(s.name) + '</option>').join('');
       if (!list.length) return '<div class="box msg">아직 공개된 시간표가 없습니다.</div>';
       if (!S.sid) {
-        return '<div class="box"><h1>수나래 시간표(학생용)</h1><select id="stu" aria-label="이름 선택"><option value="">이름을 선택하세요</option>' + names + '</select></div>';
+        return '<div class="box"><h1>수나래 시간표(학생용)</h1>' + bar + '<select id="stu" aria-label="이름 선택"><option value="">이름을 선택하세요</option>' + names + '</select></div>';
       }
       if (!S.ym) {
-        return '<div class="head"><select id="stu" aria-label="이름 선택">' + names + '</select></div><div class="box msg" style="margin-top:12px">아직 올라온 시간표가 없습니다.</div>';
+        return bar + '<div class="head"><select id="stu" aria-label="이름 선택">' + names + '</select></div><div class="box msg" style="margin-top:12px">아직 올라온 시간표가 없습니다.</div>';
       }
-      const ym = S.ym, i = d.months.indexOf(ym), c = counted(S.sid, ym), std = d.standards[ym], [y, m] = parts(ym);
-      let h = '<div class="head"><select id="stu" aria-label="이름 선택">' + names + '</select><div class="nav">' +
+      const ym = S.ym, i = d.months.indexOf(ym), c = counted(S.sid, ym), std = ((d.stdOf || {})[S.sid] || {})[ym] || d.standards[ym], [y, m] = parts(ym);
+      let h = bar + '<div class="head"><select id="stu" aria-label="이름 선택">' + names + '</select><div class="nav">' +
         '<button data-m="-1" aria-label="이전 달"' + (i <= 0 ? ' disabled' : '') + '>‹</button><b>' + y + '년 ' + m + '월</b>' +
         '<button data-m="1" aria-label="다음 달"' + (i >= d.months.length - 1 ? ' disabled' : '') + '>›</button></div></div>';
+      if (!inList && cur) h += '<div class="mu" style="margin-bottom:4px">지금 보는 시간표: <b>' + esc(cur.name) + '</b></div>';
       h += '<div class="sum"><span' + (c.base < std ? ' class="short"' : '') + '>기본 <b>' + r1(c.base) + '</b> <span class="mu">/ ' + std + '</span></span><span class="bk">보강 <b>' + r1(c.bk) + '</b></span><span>총 <b>' + r1(c.total) + '시간</b></span>' +
         (c.in ? '<span class="mu">' + monthNo(addMonths(ym, -1)) + '월에서 이월 ' + r1(c.in) + '시간 포함</span>' : '') +
         (c.out ? '<span class="mu">' + monthNo(addMonths(ym, 1)) + '월로 이월 ' + r1(c.out) + '시간</span>' : '') + '</div>';
@@ -202,11 +211,14 @@
     });
     app.addEventListener('change', e => {
       if (e.target.id !== 'stu') return;
+      if (!e.target.value) return;
       S.sid = e.target.value;
       store.set('sn_sid', S.sid);
       render();
     });
     app.addEventListener('click', e => {
+      const c = e.target.closest('[data-c]');
+      if (c) { S.cls = c.dataset.c; store.set('sn_cls', S.cls); render(); return; }
       const b = e.target.closest('[data-m]');
       if (!b || b.disabled) return;
       S.ym = S.data.months[S.data.months.indexOf(S.ym) + Number(b.dataset.m)];
