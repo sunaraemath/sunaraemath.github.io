@@ -50,6 +50,8 @@
     .cal .dn { display: block; width: fit-content; font-weight: 600; font-size: 13px; }
     .cal .today .dn { background: var(--tx); color: #fff; border-radius: 4px; padding: 0 3px; }
     .cal .rpd { opacity: .45; }
+    .nt, .cal .nt { color: var(--red); }
+    .tgr { display: inline-block; font-size: 13px; padding: 0 6px; border-radius: 6px; background: var(--red-bg); color: var(--red); }
     .cal .cv { color: var(--tx3); font-size: 11px; }
     .hw { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; margin-top: 10px; }
     .hw h2 { font-size: 15px; font-weight: 600; margin: 0 0 2px; }
@@ -103,6 +105,32 @@
       });
       return out;
     }
+
+    /**
+     * 그날 그 반 선생님이 수업하는 시간(분). 관리 프로그램과 같은 규칙입니다.
+     * 선생님 휴강이면 없음, 선생님별 특별 수업이면 그 시간, 시간표를 안 넣은 반과 학원 특별 수업일은 하루 종일.
+     */
+    function openOf(cls, ds) {
+      const td = (S.data.tdays || []).find(t => t.cls === cls && t.date === ds), teach = S.data.teach || [], h = holOf(ds);
+      if (td) return td.sp ? [[toMin(td.start), toMin(td.end)]] : [];
+      if ((h && h.type === '특별') || !teach.some(t => t.cls === cls)) return [[0, 1440]];
+      return teach.filter(t => t.cls === cls && t.dow === String(dowOf(ds))).map(t => [toMin(t.start), toMin(t.end)]);
+    }
+    /** 수업 시간 중 세 반 모두 수업이 없는 부분 */
+    function gapsOf(ds, x) {
+      if (x.rp) return [];
+      const a = toMin(x.start), b = toMin(x.end), out = [], hm = m => pad(Math.floor(m / 60)) + ':' + pad(m % 60);
+      let t = a;
+      ['원장반', '희진쌤', '혜성쌤'].reduce((l, c) => l.concat(openOf(c, ds)), []).sort((p, q) => p[0] - q[0]).forEach(o => {
+        if (t >= b) return;
+        if (o[0] > t) out.push([t, Math.min(o[0], b)]);
+        t = Math.max(t, o[1]);
+      });
+      if (t < b) out.push([t, b]);
+      return out.map(g => ({ start: hm(g[0]), end: hm(g[1]) }));
+    }
+    const dayName = ds => monthNo(ds.slice(0, 7)) + '월 ' + Number(ds.slice(8)) + '일 (' + DOW[dowOf(ds)] + ')';
+    const rngT = x => f12(x.start) + '~' + f12(x.end);
 
     /** 그 달 총합으로 세는 기본·보강 시간. 관리 프로그램의 개인 시간표와 같은 규칙입니다. */
     function counted(sid, ym) {
@@ -191,14 +219,21 @@
         const inC = ds.slice(0, 7) !== ym;
         if (inC && carryIn.indexOf(ds) < 0) { h += '<div class="blank"></div>'; return; }
         const sl = slotsOf(S.sid, ds), hh = holOf(ds), off = (hh && hh.type === '휴강') || (!sl.length && (d.offs || []).some(x => x.sid === S.sid && x.date === ds));
-        let body = off ? (hh && hh.type === '휴강' && esc(hh.reason)) || '휴강' : sl.length ? mergeRuns(sl).map(x => '<div' + (x.rp ? ' class="rpd"' : x.bk ? ' class="bk"' : '') + '>' + f12(x.start) + '<wbr>~' + f12(x.end) + '</div>').join('') : '-';
+        let body = off ? (hh && hh.type === '휴강' && esc(hh.reason)) || '휴강' : sl.length ? mergeRuns(sl).map(x => '<div' + (x.rp ? ' class="rpd"' : gapsOf(ds, x).length ? ' class="nt"' : x.bk ? ' class="bk"' : '') + '>' + f12(x.start) + '<wbr>~' + f12(x.end) + '</div>').join('') : '-';
         if (hh && hh.type === '이월') body += '<div class="cv">' + (inC ? monthNo(addMonths(ym, -1)) + '월에서' : '→' + monthNo(addMonths(ym, 1)) + '월') + '</div>';
         const cls = [off ? 'off' : '', hh && hh.type === '특별' ? 'sp' : '', !sl.length && !off ? 'none' : '', ds === d.today ? 'today' : ''].join(' ');
         h += '<div class="' + cls + '"><span class="dn">' + (inC ? monthNo(ds.slice(0, 7)) + '/' + Number(ds.slice(8)) : Number(ds.slice(8))) + '</span>' + body + '</div>';
       });
       const hw = d.hw.filter(x => x.sid === S.sid).sort((a, b) => (a.date < b.date ? -1 : 1));
       h += '</div><section class="hw"><h2>남은 숙제</h2>' + (hw.length ? hw.map(x => '<div>남은 <b>' + esc(x.remain) + '</b>문제' + (x.reason ? ' <span class="mu">· ' + esc(x.reason) + '</span>' : '') + '</div>').join('') : '<div class="mu">남은 숙제가 없습니다.</div>') + '</section>';
-      return h + '<div class="legend"><span class="bk">파랑 = 보강</span> · 빨강 = 휴강 · 노랑 = 특별 수업 · <span class="rpd">흐린 시간 = 수업 대체</span> · →다음 달 = 그날 시간은 다음 달 총합으로</div>';
+      // 이 달의 오늘 이후: 수업이 없는 시간이 낀 수업과 메인 반 선생님 휴강
+      const ahead = monthDates(ym).filter(ds => ds >= d.today);
+      const fix = [];
+      ahead.forEach(ds => mergeRuns(slotsOf(S.sid, ds)).forEach(x => { const g = gapsOf(ds, x); if (g.length) fix.push('<div>' + dayName(ds) + ' <span class="nt">' + rngT(x) + '</span> <span class="mu">· ' + g.map(rngT).join(', ') + ' 수업 없음</span></div>'); }));
+      h += '<section class="hw"><h2>시간 조정 필요</h2>' + (fix.length ? fix.join('') : '<div class="mu">조정이 필요한 시간이 없습니다.</div>') + '</section>';
+      const offs = cur && cur.cls ? ahead.filter(ds => (d.tdays || []).some(t => !t.sp && t.cls === cur.cls && t.date === ds)) : [];
+      h += '<section class="hw"><h2>선생님 휴강</h2>' + (offs.length ? offs.map(ds => '<div>' + dayName(ds) + ' <span class="tgr">' + esc(cur.cls) + ' 휴강</span></div>').join('') : '<div class="mu">' + (cur && cur.cls ? '예정된 휴강이 없습니다.' : '메인 반이 정해지지 않았습니다.') + '</div>') + '</section>';
+      return h + '<div class="legend"><span class="bk">파랑 = 보강</span> · 빨강 = 휴강 · 노랑 = 특별 수업 · <span class="rpd">흐린 시간 = 수업 대체</span> · <span class="nt">빨간 시간 = 수업 없는 시간 포함</span> · →다음 달 = 그날 시간은 다음 달 총합으로</div>';
     }
 
     app.addEventListener('submit', e => {
