@@ -89,8 +89,10 @@
     const monthDates = ym => Array.from({ length: daysIn(ym) }, (_, i) => ym + '-' + pad(i + 1));
     function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
-    /** 공개된 학생이 있는 반만 (서버가 예전 버전이면 빈 목록) */
-    const classes = () => ['원장반', '희진쌤', '혜성쌤'].filter(c => S.data.students.some(s => s.cls === c));
+    /** 공개된 학생이 있는 반만. 반이 없는 학생이 있으면 '반 없음'도 둡니다 (서버가 예전 버전이면 빈 목록) */
+    const clsOf = s => s.cls || '반 없음';
+    const classes = () => !S.data.students.some(s => s.cls) ? [] : ['원장반', '희진쌤', '혜성쌤', '반 없음'].filter(c => S.data.students.some(s => clsOf(s) === c));
+    const inCls = c => S.data.students.filter(s => clsOf(s) === c).sort((a, b) => a.name.localeCompare(b.name, 'ko'));
     const holOf = ds => S.data.holidays.find(h => h.date === ds);
     const slotsOf = (sid, ds) => S.data.slots.filter(x => x.sid === sid && x.date === ds).sort((a, b) => toMin(a.start) - toMin(b.start));
     const isCarry = ds => { const h = holOf(ds); return !!h && h.type === '이월'; };
@@ -158,8 +160,9 @@
           store.set('sn_pw', pw);
           const saved = S.sid || store.get('sn_sid');
           S.sid = d.students.some(s => s.id === saved) ? saved : '';
-          const c = S.cls || store.get('sn_cls');
-          S.cls = classes().indexOf(c) >= 0 ? c : '';
+          // 보던 학생의 반, 없으면 기억한 반, 그것도 없으면 첫 반
+          const me = d.students.find(s => s.id === S.sid), c = me ? clsOf(me) : S.cls || store.get('sn_cls');
+          S.cls = classes().indexOf(c) >= 0 ? c : classes()[0] || '';
           if (d.months.indexOf(S.ym) < 0) S.ym = pickMonth(d);
         } else if (d.denied) {
           S.pw = ''; S.data = null; store.set('sn_pw', '');
@@ -192,8 +195,8 @@
 
     function viewTable() {
       const d = S.data, list = d.students.slice().sort((a, b) => a.name.localeCompare(b.name, 'ko')), cl = classes();
-      const shown = list.filter(s => !S.cls || s.cls === S.cls), cur = list.find(s => s.id === S.sid), inList = shown.some(s => s.id === S.sid);
-      const bar = cl.length ? '<div class="cls">' + cl.concat('').map(c => '<button data-c="' + c + '"' + (c === S.cls ? ' class="on"' : '') + '>' + (c || '전체') + '</button>').join('') + '</div>' : '';
+      const shown = list.filter(s => !S.cls || clsOf(s) === S.cls), cur = list.find(s => s.id === S.sid), inList = shown.some(s => s.id === S.sid);
+      const bar = cl.length ? '<div class="cls">' + cl.map(c => '<button data-c="' + c + '"' + (c === S.cls ? ' class="on"' : '') + '>' + c + '</button>').join('') + '</div>' : '';
       const names = (S.sid && !inList ? '<option value="" selected>이름 선택</option>' : '') + shown.map(s => '<option value="' + esc(s.id) + '"' + (s.id === S.sid ? ' selected' : '') + '>' + esc(s.name) + '</option>').join('');
       if (!list.length) return '<div class="box msg">아직 공개된 시간표가 없습니다.</div>';
       if (!S.sid) {
@@ -253,7 +256,13 @@
     });
     app.addEventListener('click', e => {
       const c = e.target.closest('[data-c]');
-      if (c) { S.cls = c.dataset.c; store.set('sn_cls', S.cls); render(); return; }
+      // 다른 반을 누르면 그 반에서 이름순 첫 학생으로 넘어갑니다
+      if (c) {
+        S.cls = c.dataset.c; store.set('sn_cls', S.cls);
+        const first = inCls(S.cls)[0];
+        if (first && (!S.sid || clsOf(S.data.students.find(s => s.id === S.sid) || {}) !== S.cls)) { S.sid = first.id; store.set('sn_sid', S.sid); }
+        render(); return;
+      }
       const b = e.target.closest('[data-m]');
       if (!b || b.disabled) return;
       S.ym = S.data.months[S.data.months.indexOf(S.ym) + Number(b.dataset.m)];
