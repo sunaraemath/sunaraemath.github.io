@@ -227,8 +227,11 @@
         const cls = [off ? 'off' : '', hh && hh.type === '특별' ? 'sp' : '', !sl.length && !off ? 'none' : '', ds === d.today ? 'today' : ''].join(' ');
         h += '<div class="' + cls + '"><span class="dn">' + (inC ? monthNo(ds.slice(0, 7)) + '/' + Number(ds.slice(8)) : Number(ds.slice(8))) + '</span>' + body + '</div>';
       });
-      const hw = d.hw.filter(x => x.sid === S.sid).sort((a, b) => (a.date < b.date ? -1 : 1));
-      h += '</div><section class="hw"><h2>남은 숙제</h2>' + (hw.length ? hw.map(x => '<div>남은 <b>' + esc(x.remain) + '</b>문제' + (x.reason ? ' <span class="mu">· ' + esc(x.reason) + '</span>' : '') + '</div>').join('') : '<div class="mu">남은 숙제가 없습니다.</div>') + '</section>';
+      // 숙제는 학생마다 누적: 남은 문제 합계와 더한 기록(날짜·문제 수·사유)
+      const hw = d.hw.filter(x => x.sid === S.sid), adds = (d.hwAdds || []).filter(x => x.sid === S.sid);
+      const hist = adds.concat(hw.filter(x => !adds.some(a => a.hid === x.id)).map(x => ({ date: x.date, add: x.count || x.remain, reason: x.reason }))).sort((a, b) => (a.date < b.date ? 1 : -1));
+      const left = hw.reduce((t, x) => t + Number(x.remain || 0), 0);
+      h += '</div><section class="hw"><h2>남은 숙제</h2>' + (hw.length ? '<div>남은 <b>' + left + '</b>문제</div>' + hist.map(x => '<div class="mu">' + monthNo(x.date.slice(0, 7)) + '/' + Number(x.date.slice(8)) + ' +' + esc(x.add) + '문제' + (x.reason ? ' · ' + esc(x.reason) : '') + '</div>').join('') : '<div class="mu">남은 숙제가 없습니다.</div>') + '</section>';
       // 이 달의 오늘 이후: 수업이 없는 시간이 낀 수업과 메인 반 선생님 휴강
       const ahead = monthDates(ym).filter(ds => ds >= d.today);
       const fix = [];
