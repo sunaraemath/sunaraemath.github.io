@@ -110,13 +110,13 @@
 
     /**
      * 그날 그 반 선생님이 수업하는 시간(분). 관리 프로그램과 같은 규칙입니다.
-     * 선생님 휴강이면 없음, 선생님별 특별 수업이면 그 시간, 시간표를 안 넣은 반과 학원 특별 수업일은 하루 종일.
+     * 선생님 휴강이면 없음, 아니면 선생님 시간표(선생님별 특별 수업이면 그 시간을 더함), 시간표를 안 넣은 반과 학원 특별 수업일은 하루 종일.
      */
     function openOf(cls, ds) {
       const td = (S.data.tdays || []).find(t => t.cls === cls && t.date === ds), teach = S.data.teach || [], h = holOf(ds);
-      if (td) return td.sp ? [[toMin(td.start), toMin(td.end)]] : [];
+      if (td && !td.sp) return [];
       if ((h && h.type === '특별') || !teach.some(t => t.cls === cls)) return [[0, 1440]];
-      return teach.filter(t => t.cls === cls && t.dow === String(dowOf(ds))).map(t => [toMin(t.start), toMin(t.end)]);
+      return teach.filter(t => t.cls === cls && t.dow === String(dowOf(ds))).map(t => [toMin(t.start), toMin(t.end)]).concat(td ? [[toMin(td.start), toMin(td.end)]] : []);
     }
     /** 수업 시간 중 세 반 모두 수업이 없는 부분 */
     function gapsOf(ds, x) {
