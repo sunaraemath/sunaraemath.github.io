@@ -91,7 +91,7 @@
 
     /** 공개된 학생이 있는 반만. 반이 없는 학생이 있으면 '반 없음'도 둡니다 (서버가 예전 버전이면 빈 목록) */
     const clsOf = s => s.cls || '반 없음';
-    const classes = () => !S.data.students.some(s => s.cls) ? [] : ['원장반', '희진쌤', '혜성쌤', '반 없음'].filter(c => S.data.students.some(s => clsOf(s) === c));
+    const classes = () => !S.data.students.some(s => s.cls) ? [] : ['원장님', '희진쌤', '혜성쌤', '반 없음'].filter(c => S.data.students.some(s => clsOf(s) === c));
     const inCls = c => S.data.students.filter(s => clsOf(s) === c).sort((a, b) => a.name.localeCompare(b.name, 'ko'));
     const holOf = ds => S.data.holidays.find(h => h.date === ds);
     const slotsOf = (sid, ds) => S.data.slots.filter(x => x.sid === sid && x.date === ds).sort((a, b) => toMin(a.start) - toMin(b.start));
@@ -123,7 +123,7 @@
       if (x.rp) return [];
       const a = toMin(x.start), b = toMin(x.end), out = [], hm = m => pad(Math.floor(m / 60)) + ':' + pad(m % 60);
       let t = a;
-      ['원장반', '희진쌤', '혜성쌤'].reduce((l, c) => l.concat(openOf(c, ds)), []).sort((p, q) => p[0] - q[0]).forEach(o => {
+      ['원장님', '희진쌤', '혜성쌤'].reduce((l, c) => l.concat(openOf(c, ds)), []).sort((p, q) => p[0] - q[0]).forEach(o => {
         if (t >= b) return;
         if (o[0] > t) out.push([t, Math.min(o[0], b)]);
         t = Math.max(t, o[1]);
@@ -156,6 +156,9 @@
       try {
         const d = await fetchData(pw);
         if (d.ok) {
+          // 예전 반 이름(원장반)은 원장님으로 읽습니다
+          const rn = o => { if (o && o.cls === '원장반') o.cls = '원장님'; };
+          (d.students || []).forEach(rn); (d.teach || []).forEach(rn); (d.tdays || []).forEach(rn);
           S.pw = pw; S.data = d; S.at = Date.now(); S.err = '';
           store.set('sn_pw', pw);
           const saved = S.sid || store.get('sn_sid');
