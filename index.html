@@ -226,7 +226,7 @@
         const inC = ds.slice(0, 7) !== ym;
         if (inC && carryIn.indexOf(ds) < 0) { h += '<div class="blank"></div>'; return; }
         const sl = slotsOf(S.sid, ds), hh = holOf(ds), off = (hh && hh.type === '휴강') || (!sl.length && (d.offs || []).some(x => x.sid === S.sid && x.date === ds));
-        let body = off ? (hh && hh.type === '휴강' && esc(hh.reason)) || '휴강' : sl.length ? mergeRuns(sl).map(x => '<div' + (x.rp ? ' class="rpd"' : gapsOf(ds, x).length ? ' class="nt"' : x.bk ? ' class="bk"' : '') + '>' + f12(x.start) + '<wbr>~' + f12(x.end) + '</div>').join('') : '-';
+        let body = off ? '휴강' : sl.length ? mergeRuns(sl).map(x => '<div' + (x.rp ? ' class="rpd"' : gapsOf(ds, x).length ? ' class="nt"' : x.bk ? ' class="bk"' : '') + '>' + f12(x.start) + '<wbr>~' + f12(x.end) + '</div>').join('') : '-';
         if (hh && hh.type === '이월') body += '<div class="cv">' + (inC ? monthNo(addMonths(ym, -1)) + '월에서' : '→' + monthNo(addMonths(ym, 1)) + '월') + '</div>';
         const cls = [off ? 'off' : '', hh && hh.type === '특별' ? 'sp' : '', !sl.length && !off ? 'none' : '', ds === d.today ? 'today' : ''].join(' ');
         h += '<div class="' + cls + '"><span class="dn">' + (inC ? monthNo(ds.slice(0, 7)) + '/' + Number(ds.slice(8)) : Number(ds.slice(8))) + '</span>' + body + '</div>';
