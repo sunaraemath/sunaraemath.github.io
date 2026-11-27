@@ -113,6 +113,7 @@
      * 선생님 휴강이면 없음, 아니면 선생님 시간표(선생님별 특별 수업이면 그 시간을 더함), 시간표를 안 넣은 반과 학원 특별 수업일은 하루 종일.
      */
     function openOf(cls, ds) {
+      if ((S.data.spMonths || []).indexOf(ds.slice(0, 7)) >= 0) return [[0, 1440]]; // 특강월은 선생님 시간표를 보지 않음
       const td = (S.data.tdays || []).find(t => t.cls === cls && t.date === ds), teach = S.data.teach || [], h = holOf(ds);
       if (td && !td.sp) return [];
       if ((h && h.type === '특별') || !teach.some(t => t.cls === cls)) return [[0, 1440]];
