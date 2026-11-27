@@ -112,19 +112,22 @@
      * 그날 그 반 선생님이 수업하는 시간(분). 관리 프로그램과 같은 규칙입니다.
      * 선생님 휴강이면 없음, 아니면 선생님 시간표(선생님별 특별 수업이면 그 시간을 더함), 시간표를 안 넣은 반과 학원 특별 수업일은 하루 종일.
      */
-    function openOf(cls, ds) {
+    // 초등만 시간: 초등이 아니고 그 반에 고정되지도 않은 학생은 못 들어감
+    const teachOk = (t, s) => !t.el || !s || /^초/.test(s.grade || '') || (s.fix && s.cls === t.cls);
+    function openOf(cls, ds, s) {
       if ((S.data.spMonths || []).indexOf(ds.slice(0, 7)) >= 0) return [[0, 1440]]; // 특강월은 선생님 시간표를 보지 않음
       const td = (S.data.tdays || []).find(t => t.cls === cls && t.date === ds), teach = S.data.teach || [], h = holOf(ds);
       if (td && !td.sp) return [];
       if ((h && h.type === '특별') || !teach.some(t => t.cls === cls)) return [[0, 1440]];
-      return teach.filter(t => t.cls === cls && t.dow === String(dowOf(ds))).map(t => [toMin(t.start), toMin(t.end)]).concat(td ? [[toMin(td.start), toMin(td.end)]] : []);
+      return teach.filter(t => t.cls === cls && t.dow === String(dowOf(ds)) && teachOk(t, s)).map(t => [toMin(t.start), toMin(t.end)]).concat(td ? [[toMin(td.start), toMin(td.end)]] : []);
     }
     /** 수업 시간 중 세 반 모두 수업이 없는 부분 */
     function gapsOf(ds, x) {
       if (x.rp) return [];
       const a = toMin(x.start), b = toMin(x.end), out = [], hm = m => pad(Math.floor(m / 60)) + ':' + pad(m % 60);
       let t = a;
-      ['원장님', '희진쌤', '혜성쌤'].reduce((l, c) => l.concat(openOf(c, ds)), []).sort((p, q) => p[0] - q[0]).forEach(o => {
+      const s = (S.data.students || []).find(x => x.id === S.sid);
+      ['원장님', '희진쌤', '혜성쌤'].reduce((l, c) => l.concat(openOf(c, ds, s)), []).sort((p, q) => p[0] - q[0]).forEach(o => {
         if (t >= b) return;
         if (o[0] > t) out.push([t, Math.min(o[0], b)]);
         t = Math.max(t, o[1]);
