@@ -133,7 +133,7 @@
       return out.map(g => ({ start: hm(g[0]), end: hm(g[1]) }));
     }
     const dayName = ds => monthNo(ds.slice(0, 7)) + '월 ' + Number(ds.slice(8)) + '일 (' + DOW[dowOf(ds)] + ')';
-    const rngT = x => f12(x.start) + '~' + f12(x.end);
+    const rngT = x => f12(x.start).replace('오전 ', '') + '~' + f12(x.end).replace('오전 ', '');
 
     /** 그 달 총합으로 세는 기본·보강 시간. 관리 프로그램의 개인 시간표와 같은 규칙입니다. */
     function counted(sid, ym) {
@@ -226,7 +226,7 @@
         const inC = ds.slice(0, 7) !== ym;
         if (inC && carryIn.indexOf(ds) < 0) { h += '<div class="blank"></div>'; return; }
         const sl = slotsOf(S.sid, ds), hh = holOf(ds), off = (hh && hh.type === '휴강') || (!sl.length && (d.offs || []).some(x => x.sid === S.sid && x.date === ds));
-        let body = off ? '휴강' : sl.length ? mergeRuns(sl).map(x => '<div' + (x.rp ? ' class="rpd"' : gapsOf(ds, x).length ? ' class="nt"' : x.bk ? ' class="bk"' : '') + '>' + f12(x.start) + '<wbr>~' + f12(x.end) + '</div>').join('') : '-';
+        let body = off ? '휴강' : sl.length ? mergeRuns(sl).map(x => '<div' + (x.rp ? ' class="rpd"' : gapsOf(ds, x).length ? ' class="nt"' : x.bk ? ' class="bk"' : '') + '>' + f12(x.start).replace('오전 ', '') + '<wbr>~' + f12(x.end).replace('오전 ', '') + '</div>').join('') : '-';
         if (hh && hh.type === '이월') body += '<div class="cv">' + (inC ? monthNo(addMonths(ym, -1)) + '월에서' : '→' + monthNo(addMonths(ym, 1)) + '월') + '</div>';
         const cls = [off ? 'off' : '', hh && hh.type === '특별' ? 'sp' : '', !sl.length && !off ? 'none' : '', ds === d.today ? 'today' : ''].join(' ');
         h += '<div class="' + cls + '"><span class="dn">' + (inC ? monthNo(ds.slice(0, 7)) + '/' + Number(ds.slice(8)) : Number(ds.slice(8))) + '</span>' + body + '</div>';
@@ -236,14 +236,15 @@
       const hist = adds.concat(hw.filter(x => !adds.some(a => a.hid === x.id)).map(x => ({ date: x.date, add: x.count || x.remain, reason: x.reason }))).sort((a, b) => (a.date < b.date ? 1 : -1));
       const left = hw.reduce((t, x) => t + Number(x.remain || 0), 0);
       h += '</div><section class="hw"><h2>남은 숙제</h2>' + (hw.length ? '<div>남은 <b>' + left + '</b>문제</div>' + hist.map(x => '<div class="mu">' + monthNo(x.date.slice(0, 7)) + '/' + Number(x.date.slice(8)) + ' +' + esc(x.add) + '문제' + (x.reason ? ' · ' + esc(x.reason) : '') + '</div>').join('') : '<div class="mu">남은 숙제가 없습니다.</div>') + '</section>';
-      // 이 달의 오늘 이후: 수업이 없는 시간이 낀 수업과 메인 반 선생님 휴강
+      // 이 달의 오늘 이후: 수업이 없는 시간이 낀 수업과 모든 선생님 휴강
       const ahead = monthDates(ym).filter(ds => ds >= d.today);
       const fix = [];
       ahead.forEach(ds => mergeRuns(slotsOf(S.sid, ds)).forEach(x => { const g = gapsOf(ds, x); if (g.length) fix.push('<div>' + dayName(ds) + ' <span class="nt">' + rngT(x) + '</span> <span class="mu">· ' + g.map(rngT).join(', ') + ' 수업 없음</span></div>'); }));
       h += '<section class="hw"><h2>시간 조정 필요</h2>' + (fix.length ? fix.join('') : '<div class="mu">조정이 필요한 시간이 없습니다.</div>') + '</section>';
-      const offs = cur && cur.cls ? ahead.filter(ds => (d.tdays || []).some(t => !t.sp && t.cls === cur.cls && t.date === ds)) : [];
-      h += '<section class="hw"><h2>선생님 휴강</h2>' + (offs.length ? offs.map(ds => '<div>' + dayName(ds) + ' <span class="tgr">' + esc(cur.cls) + ' 휴강</span></div>').join('') : '<div class="mu">' + (cur && cur.cls ? '예정된 휴강이 없습니다.' : '메인 반이 정해지지 않았습니다.') + '</div>') + '</section>';
-      return h + '<div class="legend"><span class="bk">파랑 = 보강</span> · 빨강 = 휴강 · 노랑 = 특별 수업 · <span class="rpd">흐린 시간 = 수업 대체</span> · <span class="nt">빨간 시간 = 수업 없는 시간 포함</span> · →다음 달 = 그날 시간은 다음 달 총합으로</div>';
+      // 모든 선생님의 휴강 (이 달 오늘 이후, 날짜 순)
+      const offs = (d.tdays || []).filter(t => !t.sp && ahead.indexOf(t.date) >= 0).sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+      h += '<section class="hw"><h2>선생님 휴강</h2>' + (offs.length ? offs.map(t => '<div>' + dayName(t.date) + ' <span class="tgr">' + esc(t.cls) + ' 휴강</span></div>').join('') : '<div class="mu">예정된 휴강이 없습니다.</div>') + '</section>';
+      return h;
     }
 
     app.addEventListener('submit', e => {
