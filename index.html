@@ -64,7 +64,8 @@
   <main id="app"><div class="box msg">불러오는 중…</div></main>
   <script>
     // Apps Script 배포 주소 (학생용 프로젝트의 웹 앱 URL)
-    const API_URL = 'https://script.google.com/macros/s/AKfycbxI9TRLCPsv1BFKRfJxl2ZPFVk7Cs3zKe-_PI5H7u91h72-4ZpbogA6jO10JxN-8vy6Fw/exec';
+    // 시간표는 관리 화면이 Firebase에 올려 둔 학생용 사본에서 읽습니다 (비밀번호로 만든 열쇠 주소의 문서 하나)
+    const PUB_URL = 'https://firestore.googleapis.com/v1/projects/sunarae-math/databases/(default)/documents/pub/';
 
     const DOW = ['일', '월', '화', '수', '목', '금', '토'];
     const S = { pw: '', data: null, sid: '', cls: '', ym: '', err: '', busy: false, tried: false, at: 0 };
@@ -148,10 +149,18 @@
       return r;
     }
 
+    async function keyOf(pw) {
+      const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('sunarae:' + pw));
+      return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, '0')).join('');
+    }
     async function fetchData(pw) {
-      const res = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ pw: pw }) });
+      const res = await fetch(PUB_URL + (await keyOf(pw)), { cache: 'no-store' });
+      if (res.status === 404) return { ok: false, denied: true };
       if (!res.ok) throw new Error('network');
-      return res.json();
+      const d = JSON.parse((await res.json()).fields.json.stringValue);
+      // 오늘 날짜는 지금 기준으로 (사본을 만든 날이 아니라)
+      d.today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul' }).format(new Date());
+      return d;
     }
 
     async function load(pw, quiet) {
