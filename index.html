@@ -37,7 +37,8 @@
     .sum { display: flex; flex-wrap: wrap; gap: 2px 12px; margin-bottom: 10px; font-size: 15px; }
     .mu { color: var(--tx2); }
     .bk { color: var(--acc); }
-    .short { color: var(--red); }
+    .short { color: var(--red); } .over { color: #1d5fbf; }
+    .lunch { text-align: right; font-size: 13px; color: var(--tx2); margin: -4px 2px 8px; }
     .cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; font-size: 12px; line-height: 1.3; }
     .cal > div { background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 2px 3px; min-height: 58px; overflow-wrap: anywhere; }
     .cal .h { background: none; border: none; min-height: 0; text-align: center; color: var(--tx2); font-size: 14px; }
@@ -98,12 +99,16 @@
     const slotsOf = (sid, ds) => S.data.slots.filter(x => x.sid === sid && x.date === ds).sort((a, b) => toMin(a.start) - toMin(b.start));
     const isCarry = ds => { const h = holOf(ds); return !!h && h.type === '이월'; };
 
-    /** 끝과 시작이 맞닿은 수업을 하나로 합칩니다. 보강이 들어 있으면 bk, 수업 대체는 합치지 않습니다. */
-    function mergeRuns(sl) {
+    /** 특강 달: 12:30~1:30은 점심시간 (그 사이를 둔 수업은 이어진 것으로 봅니다) */
+    const LUNCH = ['12:30', '13:30'];
+    const isSpM = ym => (S.data.spMonths || []).indexOf(ym) >= 0;
+    /** 끝과 시작이 맞닿은 수업을 하나로 합칩니다(특강 달은 점심시간을 사이에 둔 수업도). 보강이 들어 있으면 bk, 수업 대체는 합치지 않습니다. */
+    function mergeRuns(sl, sp) {
       const out = [];
       sl.forEach(x => {
         const last = out[out.length - 1];
-        if (last && !x.rp && !last.rp && last.end === x.start) { last.end = x.end; last.bk = last.bk || x.bk; }
+        const lunch = sp && last && toMin(last.end) >= toMin(LUNCH[0]) && toMin(x.start) <= toMin(LUNCH[1]) && toMin(x.start) >= toMin(last.end);
+        if (last && !x.rp && !last.rp && (last.end === x.start || lunch)) { last.end = x.end; last.bk = last.bk || x.bk; }
         else out.push({ start: x.start, end: x.end, bk: x.bk, rp: x.rp });
       });
       return out;
@@ -226,7 +231,13 @@
         '<button data-m="-1" aria-label="이전 달"' + (i <= 0 ? ' disabled' : '') + '>‹</button><b>' + y + '년 ' + m + '월</b>' +
         '<button data-m="1" aria-label="다음 달"' + (i >= d.months.length - 1 ? ' disabled' : '') + '>›</button></div></div>';
       if (!inList && cur) h += '<div class="mu" style="margin-bottom:4px">지금 보는 시간표: <b>' + esc(cur.name) + '</b></div>';
-      h += '<div class="sum"><span' + (c.base < std ? ' class="short"' : '') + '>기본 <b>' + r1(c.base) + '</b> <span class="mu">/ ' + std + '</span></span><span class="bk">보강 <b>' + r1(c.bk) + '</b></span><span>총 <b>' + r1(c.total) + '시간</b></span>' +
+      // 특강 달: 특강 기간 전체 합계를 기준과 비교 / 학기 달: 기본 시간을 그 달 기준과 비교 (관리 화면과 같은 규칙)
+      const sp = isSpM(ym), cmp = (v, s) => (v < s ? ' class="short"' : v > s ? ' class="over"' : '');
+      if (sp) h += '<div class="lunch">점심시간 12:30~1:30</div>';
+      const spSum = sp ? d.spMonths.reduce((t, y) => t + counted(S.sid, y).total, 0) : 0, spStd = sp ? (((d.stdOf || {})[S.sid] || {})[d.spMonths[0]] || std) : 0;
+      h += '<div class="sum">' + (sp
+        ? '<span>' + m + '월 <b>' + r1(c.total) + '</b>시간</span><span' + cmp(r1(spSum), spStd) + '>특강 합계 <b>' + r1(spSum) + '</b> <span class="mu">/ 기준 ' + spStd + '</span></span>'
+        : '<span' + cmp(r1(c.base), std) + '>기본 <b>' + r1(c.base) + '</b> <span class="mu">/ 기준 ' + std + '</span></span><span class="mu">(총 ' + r1(c.total) + ')</span>') +
         (c.in ? '<span class="mu">' + monthNo(addMonths(ym, -1)) + '월에서 이월 ' + r1(c.in) + '시간 포함</span>' : '') +
         (c.out ? '<span class="mu">' + monthNo(addMonths(ym, 1)) + '월로 이월 ' + r1(c.out) + '시간</span>' : '') + '</div>';
       h += '<div class="cal">' + DOW.map((x, k) => '<div class="h' + (k ? '' : ' sun') + '">' + x + '</div>').join('');
@@ -238,7 +249,7 @@
         const inC = ds.slice(0, 7) !== ym;
         if (inC && carryIn.indexOf(ds) < 0) { h += '<div class="blank"></div>'; return; }
         const sl = slotsOf(S.sid, ds), hh = holOf(ds), off = (hh && hh.type === '휴강') || (!sl.length && (d.offs || []).some(x => x.sid === S.sid && x.date === ds));
-        let body = off ? '휴강' : sl.length ? mergeRuns(sl).map(x => '<div' + (x.rp ? ' class="rpd"' : gapsOf(ds, x).length ? ' class="nt"' : x.bk ? ' class="bk"' : '') + '>' + f12(x.start).replace('오전 ', '') + '<wbr>~' + f12(x.end).replace('오전 ', '') + '</div>').join('') : '-';
+        let body = off ? '휴강' : sl.length ? mergeRuns(sl, isSpM(ds.slice(0, 7))).map(x => '<div' + (x.rp ? ' class="rpd"' : gapsOf(ds, x).length ? ' class="nt"' : x.bk ? ' class="bk"' : '') + '>' + f12(x.start).replace('오전 ', '') + '<wbr>~' + f12(x.end).replace('오전 ', '') + '</div>').join('') : '-';
         if (hh && hh.type === '이월') body += '<div class="cv">' + (inC ? monthNo(addMonths(ym, -1)) + '월에서' : '→' + monthNo(addMonths(ym, 1)) + '월') + '</div>';
         const cls = [off ? 'off' : '', hh && hh.type === '특별' ? 'sp' : '', !sl.length && !off ? 'none' : '', ds === d.today ? 'today' : ''].join(' ');
         h += '<div class="' + cls + '"><span class="dn">' + (inC ? monthNo(ds.slice(0, 7)) + '/' + Number(ds.slice(8)) : Number(ds.slice(8))) + '</span>' + body + '</div>';
@@ -251,7 +262,7 @@
       // 이 달의 오늘 이후: 수업이 없는 시간이 낀 수업과 모든 선생님 휴강
       const ahead = monthDates(ym).filter(ds => ds >= d.today);
       const fix = [];
-      ahead.forEach(ds => mergeRuns(slotsOf(S.sid, ds)).forEach(x => { const g = gapsOf(ds, x); if (g.length) fix.push('<div>' + dayName(ds) + ' <span class="nt">' + rngT(x) + '</span> <span class="mu">· ' + g.map(rngT).join(', ') + ' 수업 없음</span></div>'); }));
+      ahead.forEach(ds => mergeRuns(slotsOf(S.sid, ds), isSpM(ym)).forEach(x => { const g = gapsOf(ds, x); if (g.length) fix.push('<div>' + dayName(ds) + ' <span class="nt">' + rngT(x) + '</span> <span class="mu">· ' + g.map(rngT).join(', ') + ' 수업 없음</span></div>'); }));
       h += '<section class="hw"><h2>시간 조정 필요</h2>' + (fix.length ? fix.join('') : '<div class="mu">조정이 필요한 시간이 없습니다.</div>') + '</section>';
       // 모든 선생님의 휴강 (이 달 오늘 이후, 날짜 순)
       const offs = (d.tdays || []).filter(t => !t.sp && ahead.indexOf(t.date) >= 0).sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
